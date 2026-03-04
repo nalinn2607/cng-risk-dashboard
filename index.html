@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CNG Holdings – Risk Strategy Dashboard</title>
+  <meta name="description"
+    content="Real-time AI/ML-powered risk strategy dashboard for CNG Holdings non-banking subprime lender — charge-off prediction, DPD migration, financial health scoring, and AI-driven collection recommendations.">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+</head>
+
+<body>
+  <div id="app">
+
+    <!-- ── SIDEBAR ──────────────────────────────────────────── -->
+    <nav id="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-badge">⚡ CNG Holdings</div>
+        <div class="logo-subtitle">RISK STRATEGY COMMAND CENTER</div>
+      </div>
+      <div class="sidebar-section-title">Overview</div>
+      <div class="nav-item active" data-tab="portfolio" onclick="switchTab('portfolio',this)">
+        <span class="nav-icon">📊</span> Portfolio Overview
+      </div>
+      <div class="sidebar-section-title">Risk Intelligence</div>
+      <div class="nav-item" data-tab="ews" onclick="switchTab('ews',this)">
+        <span class="nav-icon">🚨</span> Early Warning Signals
+        <span class="nav-badge">12</span>
+      </div>
+      <div class="nav-item" data-tab="dpd" onclick="switchTab('dpd',this)">
+        <span class="nav-icon">📈</span> DPD Migration & Trends
+      </div>
+      <div class="nav-item" data-tab="chargeoff" onclick="switchTab('chargeoff',this)">
+        <span class="nav-icon">🎯</span> Charge-Off Prediction
+        <span class="nav-badge">High</span>
+      </div>
+      <div class="nav-item" data-tab="loss" onclick="switchTab('loss',this)">
+        <span class="nav-icon">💰</span> Estimated Loss Forecast
+      </div>
+      <div class="sidebar-section-title">Segmentation</div>
+      <div class="nav-item" data-tab="segments" onclick="switchTab('segments',this)">
+        <span class="nav-icon">🧬</span> Behavioural Segmentation
+      </div>
+      <div class="sidebar-section-title">Dimensions</div>
+      <div class="nav-item" data-tab="product" onclick="switchTab('product',this)">
+        <span class="nav-icon">🏷️</span> Product-Level Risk
+      </div>
+      <div class="nav-item" data-tab="geo" onclick="switchTab('geo',this)">
+        <span class="nav-icon">🗺️</span> Geographic Risk View
+      </div>
+      <div class="nav-item" data-tab="channel" onclick="switchTab('channel',this)">
+        <span class="nav-icon">🔀</span> Channel Risk View
+      </div>
+      <div class="sidebar-section-title">Scoring</div>
+      <div class="nav-item" data-tab="vulnerability" onclick="switchTab('vulnerability',this)">
+        <span class="nav-icon">🛡️</span> Vulnerability Score
+      </div>
+      <div class="nav-item" data-tab="fhs" onclick="switchTab('fhs',this)">
+        <span class="nav-icon">💚</span> Financial Health Score
+      </div>
+      <div class="sidebar-section-title">Intelligence</div>
+      <div class="nav-item" data-tab="actions" onclick="switchTab('actions',this)">
+        <span class="nav-icon">🤖</span> AI Action Recommendations
+        <span class="nav-badge">6</span>
+      </div>
+      <div class="sidebar-footer">
+        <span class="pulse-dot"></span> Live · Updated <span id="lastUpdate">just now</span>
+      </div>
+    </nav>
+
+    <!-- ── MAIN ─────────────────────────────────────────────── -->
+    <div id="main">
+      <header id="header">
+        <div>
+          <div class="header-title" id="headerTitle">Portfolio Overview</div>
+          <div class="header-subtitle">Non-Banking Subprime Lender · Risk Strategy</div>
+        </div>
+        <div class="header-meta">
+          <button class="theme-toggle" id="themeToggle" title="Toggle Light/Dark Mode" aria-label="Toggle Theme">
+            <div class="theme-toggle-slider"></div>
+            <div class="theme-toggle-icons">
+              <span class="icon-sun">☀️</span>
+              <span class="icon-moon">🌙</span>
+            </div>
+          </button>
+          <div class="live-chip"><span class="pulse-dot"></span> LIVE DATA</div>
+          <div class="timestamp" id="tsDisplay">Loading...</div>
+          <button class="header-btn" onclick="refreshDashboard()">⟳ Refresh</button>
+          <button class="header-btn" onclick="exportCSV()">↓ Export</button>
+        </div>
+      </header>
+
+      <div id="content">
+
+        <!-- ═══════════════════════════════════════════════════
+         TAB 1 · PORTFOLIO OVERVIEW
+    ════════════════════════════════════════════════════ -->
+        <div id="tab-portfolio" class="tab-panel active">
+          <div class="page-header">
+            <div class="page-title">Portfolio Overview</div>
+            <div class="page-desc">Real-time snapshot of loan portfolio health, delinquency distribution, and
+              performance trends.</div>
+          </div>
+
+          <!-- KPI Row -->
+          <div class="kpi-grid" id="portfolioKPIs"></div>
+
+          <!-- Charts Row 1 -->
+          <div class="grid-3">
+            <div class="card">
+              <div class="card-title"><span class="icon">📊</span>DPD Distribution</div>
+              <div class="chart-wrap" style="height:200px"><canvas id="dpdDistChart"></canvas></div>
+            </div>
+            <div class="card span-2">
+              <div class="card-title"><span class="icon">📈</span>Portfolio Trend Over Time</div>
+              <div class="chart-wrap" style="height:200px"><canvas id="portfolioTrendChart"></canvas></div>
+            </div>
+          </div>
+
+          <!-- Charts Row 2 -->
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title"><span class="icon">🍰</span>Loan Product Mix</div>
+              <div class="chart-wrap" style="height:220px"><canvas id="productMixChart"></canvas></div>
+            </div>
+            <div class="card">
+              <div class="card-title"><span class="icon">↕️</span>Roll Rates</div>
+              <div id="rollRateDisplay"></div>
+              <div class="chart-wrap" style="height:140px; margin-top:8px"><canvas id="rollRateChart"></canvas></div>
+            </div>
+          </div>
+
+          <!-- Charge-Off Rate Detail -->
+          <div class="card">
+            <div class="card-title"><span class="icon">🎯</span>Charge-Off Rate — MTD / QTD / YTD</div>
+            <div id="coRateDisplay" style="display:flex; gap:32px;"></div>
+          </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════
+         TAB 2 · EARLY WARNING SIGNALS
+    ════════════════════════════════════════════════════ -->
+        <div id="tab-ews" class="tab-panel">
+          <div class="page-header">
+            <div class="page-title">Early Warning Risk Signals</div>
+            <div class="page-desc">AI-powered detection using alternative behavioral signals for thin-file /
+              credit-invisible customers.</div>
+          </div>
+
+          <!-- Alert Summary -->
+          <div id="ewsAlerts" style="margin-bottom:16px;"></div>
+
+          <div class="grid-3">
+            <div class="card">
+              <div class="card-title"><span class="icon">📉</span>EW Score Distribution</div>
+              <div class="chart-wrap" style="height:200px"><canvas id="ewsScoreChart"></canvas></div>
+            </div>
+            <div class="card span-2">
+              <div class="card-title"><span class="icon">📅</span>Risk Signal Trend — Last 30 Days</div>
+              <div class="chart-wrap" style="height:200px"><canvas id="ewsTrendChart"></canvas></div>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title"><span class="icon">🔥</span>Risk Heatmap by Segment</div>
+              <div id="ewsHeatmapTable"></div>
+            </div>
+            <div class="card">
+              <div class="card-title"><span class="icon">⚠️</span>Key Risk Indicators</div>
+              <div id="ewsKRIDisplay"></div>
+              <div class="insight-box" style="margin-top:12px;">
+                <strong>⚡ Live Insight:</strong> 18.4% of borrowers have triggered ≥3 simultaneous warning signals.
+                Payday stacking + broken P2P correlation at <strong>0.78</strong>.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════
+         TAB 3 · DPD MIGRATION
+    ════════════════════════════════════════════════════ -->
+        <div id="tab-dpd" class="tab-panel">
+          <div class="page-header">
+            <div class="page-title">DPD Migration & Trends</div>
+            <div class="page-desc">Markov chain–based delinquency bucket migration, roll rates, and cohort analysis.
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title"><span class="icon">📈</span>DPD Bucket Trend</div>
+              <div class="chart-wrap" style="height:220px"><canvas id="dpdTrendChart"></canvas></div>
+            </div>
+            <div class="card">
+              <div class="card-title"><span class="icon">🔄</span>DPD Migration Matrix</div>
+              <div id="migrationMatrixDisplay"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title"><span class="icon">👥</span>Cohort Delinquency (% at DPD 30+ by Months Since
+              Origination)</div>
+            <div class="chart-wrap" style="height:200px"><canvas id="cohortChart"></canvas></div>
+            <div class="insight-box">
+              <strong>📌 Insight:</strong> 25% of 30–59 DPD bucket customers migrate to 60–89 DPD within 2 weeks. Jan-25
+              cohort shows highest 6-month delinquency at <strong>34.2%</strong>.
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════
+         TAB 4 · CHARGE-OFF PREDICTION
+    ════════════════════════════════════════════════════ -->
+        <div id="tab-chargeoff" class="tab-panel">
+          <div class="page-header">
+            <div class="page-title">Charge-Off Prediction</div>
+          </div>
+
+          <div class="kpi-grid" id="coKPIs"></div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title"><span class="icon">📊</span>Risk Score Distribution</div>
+              <div class="chart-wrap" style="height:200px"><canvas id="riskHistChart"></canvas></div>
+            </div>
+            <div class="card">
+              <div class="card-title"><span class="icon">🔑</span>Key Risk Drivers</div>
+              <div id="shapDisplay"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title"><span class="icon">⚠️</span>High-Risk Customer Watch List</div>
+            <div style="display:flex; gap:8px; margin-bottom:12px; align-items:center;">
+              <input id="searchCustomer" type="text" placeholder="Search customer ID or name…"
+                style="background:var(--bg-input);border:1px solid var(--border);color:var(--text-primary);padding:6px 12px;border-radius:6px;font-size:0.78rem;flex:1;font-family:Inter">
+              <select id="filterTier" onchange="renderCustomerTable()"
+                style="background:var(--bg-input);border:1px solid var(--border);color:var(--text-primary);padding:6px 10px;border-radius:6px;font-size:0.78rem;font-family:Inter">
+                <option value="">All Tiers</option>
+                <option value="Critical">Critical</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+              </select>
+            </div>
+            <div class="table-wrap" id="customerTableWrap"></div>
+          </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════
+         TAB 5 · LOSS FORECAST
+    ════════════════════════════════════════════════════ -->
+        <div id="tab-loss" class="tab-panel">
+          <div class="page-header">
+            <div class="page-title">Estimated Loss Forecast</div>
+          </div>
+
+          <div class="kpi-grid" id="lossKPIs"></div>
+
+          <div class="grid-2">
+            <div class="card span-2">
+              <div class="card-title"><span class="icon">📉</span>Loss Forecast Curve — Expected / Upside / Downside
+                Scenarios</div>
+              <div class="chart-wrap" style="height:220px"><canvas id="lossCurveChart"></canvas></div>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title"><span class="icon">🏷️</span>Product-Wise Expected Loss</div>
+              <div class="chart-wrap" style="height:200px"><canvas id="lossProductChart"></canvas></div>
+            </div>
+            <div class="card">
+              <div class="card-title"><span class="icon">🧬</span>Segment-Wise Expected Loss</div>
+              <div class="chart-wrap" style="height:200px"><canvas id="lossSegmentChart"></canvas></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════
+         TAB 6 · BEHAVIOURAL SEGMENTATION
+    ════════════════════════════════════════════════════ -->
+        <div id="tab-segments" class="tab-panel">
+          <div class="page-header">
+            <div class="page-title">Behavioural Segmentation</div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title"><span class="icon">🔵</span>Cluster Scatter Plot (Risk Score vs Engagement)</div>
+              <div class="chart-wrap" style="height:280px"><canvas id="scatterChart"></canvas></div>
+            </div>
+            <div class="card">
+              <div class="card-title"><span class="icon">📊</span>Segment Size Distribution</div>
+              <div class="chart-wrap" style="height:280px"><canvas id="segmentSizeChart"></canvas></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title"><span class="icon">📋</span>Segment Charge-Off & Recovery Rates</div>
+            <div id="segmentDetailTable"></div>
+          </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════
+         TAB 7 · PRODUCT RISK
+    ════════════════════════════════════════════════════ -->
+        <div id="tab-product" class="tab-panel">
+          <div class="page-header">
+            <div class="page-title">Product-Level Risk View</div>
+            <div class="page-desc">Risk metrics across Payday, Installment, Auto Title, and Pawn loan products.</div>
+          </div>
+
+          <div id="productKPICards" style="margin-bottom:16px;"></div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title"><span class="icon">📊</span>Charge-Off % by Product</div>
+              <div class="chart-wrap" style="height:200px"><canvas id="productCOChart"></canvas></div>
+            </div>
+            <div class="card">
+              <div class="card-title"><span class="icon">📈</span>Avg DPD vs Recovery by Product</div>
+              <div class="chart-wrap" style="height:200px"><canvas id="productDPDChart"></canvas></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title"><span class="icon">📋</span>Product Risk Summary</div>
+            <div class="table-wrap" id="productTableWrap"></div>
+            <div class="insight-box">
+              <strong>💡 Insight:</strong> Auto Title loans show highest LGD (<strong>71.3%</strong>) but lowest PD
+              (<strong>7.2%</strong>). Pawn loans have highest charge-off rate (<strong>6.7%</strong>) with strong
+              recovery via collateral (<strong>62.1%</strong>).
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════
+         TAB 8 · GEOGRAPHIC RISK
+    ════════════════════════════════════════════════════ -->
+        <div id="tab-geo" class="tab-panel">
+          <div class="page-header">
+            <div class="page-title">Geographic Risk View</div>
+            <div class="page-desc">State-level risk heatmap showing charge-off rates, roll rates, and unemployment
+              correlation.</div>
+          </div>
+
+          <div id="geoAlerts" style="margin-bottom:16px;"></div>
+
+          <div class="card" style="margin-bottom:16px;">
+            <div class="card-title"><span class="icon">🗺️</span>State Risk Heatmap — Charge-Off %</div>
+            <div id="geoHeatmapGrid"></div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title"><span class="icon">📊</span>Top 10 States by Risk Score</div>
+              <div class="chart-wrap" style="height:220px"><canvas id="geoBarChart"></canvas></div>
+            </div>
+            <div class="card">
+              <div class="card-title"><span class="icon">📋</span>State Risk Summary</div>
+              <div class="table-wrap" id="geoTableWrap"></div>
+            </div>
+          </div>
+
+          <div class="insight-box" style="margin-top:16px;">
+            <strong>🏭 Alert:</strong> MS, AL, and TN show highest 30→60 DPD roll rate correlation with recent regional
+            job layoffs. TX leads in absolute active loan volume but risk score remains moderate.
+          </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════
+         TAB 9 · CHANNEL RISK
+    ════════════════════════════════════════════════════ -->
+        <div id="tab-channel" class="tab-panel">
+          <div class="page-header">
+            <div class="page-title">Channel-Level Risk View</div>
+            <div class="page-desc">Compare Online vs. Retail Store channel performance across DPD, charge-off, recovery,
+              and roll rates.</div>
+          </div>
+
+          <div id="channelCards" style="margin-bottom:16px;"></div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title"><span class="icon">📈</span>DPD Trend by Channel</div>
+              <div class="chart-wrap" style="height:210px"><canvas id="channelDPDChart"></canvas></div>
+            </div>
+            <div class="card">
+              <div class="card-title"><span class="icon">📊</span>Charge-Off Trend by Channel</div>
+              <div class="chart-wrap" style="height:210px"><canvas id="channelCOChart"></canvas></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title"><span class="icon">📊</span>Channel Comparison — Radar</div>
+            <div class="chart-wrap" style="height:280px; max-width:480px; margin:0 auto;"><canvas
+                id="channelRadarChart"></canvas></div>
+          </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════
+         TAB 10 · VULNERABILITY SCORE
+    ════════════════════════════════════════════════════ -->
+        <div id="tab-vulnerability" class="tab-panel">
+          <div class="page-header">
+            <div class="page-title">Vulnerability Score</div>
+            <div class="page-desc">Multi-dimensional borrower vulnerability across financial, behavioral, geographic,
+              and life-event dimensions.</div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title"><span class="icon">🎯</span>Vulnerability Tier Distribution</div>
+              <div class="chart-wrap" style="height:260px"><canvas id="vulnTierChart"></canvas></div>
+            </div>
+            <div class="card">
+              <div class="card-title"><span class="icon">📊</span>Vulnerability by Category</div>
+              <div class="chart-wrap" style="height:260px"><canvas id="vulnCategoryChart"></canvas></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title"><span class="icon">📋</span>Category-level Metrics</div>
+            <div class="table-wrap" id="vulnTableWrap"></div>
+          </div>
+
+          <div class="insight-box" style="margin-top:16px;">
+            <strong>⚡ Finding:</strong> Behavioral & Engagement vulnerability has the highest avg DPD (61.3) and
+            charge-off rate (28.4%). Life Event vulnerability shows the highest vulnerability score avg (71.2),
+            correlating strongly with 90+ DPD.
+          </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════
+         TAB 11 · FINANCIAL HEALTH SCORE
+    ════════════════════════════════════════════════════ -->
+        <div id="tab-fhs" class="tab-panel">
+          <div class="page-header">
+            <div class="page-title">Financial Health Score (FHS)</div>
+            <div class="page-desc">Composite scoring model across 6 pillars: Income Stability, Payment Behaviour,
+              Financial Stress, Loan Behaviour, Contactability, Collateral Quality.</div>
+          </div>
+
+          <!-- Formula card -->
+          <div class="card"
+            style="margin-bottom:16px; background: linear-gradient(135deg, rgba(29,110,245,0.08), rgba(6,182,212,0.05));">
+            <div class="card-title"><span class="icon">🔬</span>FHS Formula (XGBoost Weights)</div>
+            <div style="font-family:'JetBrains Mono'; font-size:0.8rem; color:var(--text-secondary); line-height:1.8;">
+              <span style="color:var(--accent-cyan)">FHS</span> =
+              <span style="color:var(--accent-green)">0.25</span> × Income Stability +
+              <span style="color:var(--accent-green)">0.25</span> × Payment Behaviour +
+              <span style="color:var(--accent-yellow)">0.15</span> × Financial Stress +
+              <span style="color:var(--accent-yellow)">0.15</span> × Loan Behaviour +
+              <span style="color:var(--accent-blue)">0.10</span> × Contactability +
+              <span style="color:var(--accent-blue)">0.10</span> × Collateral Quality
+            </div>
+          </div>
+
+          <!-- Pillar Scores -->
+          <div class="card" style="margin-bottom:16px;">
+            <div class="card-title"><span class="icon">⚖️</span>Pillar Scores (Portfolio Average)</div>
+            <div id="pillarBars"></div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title"><span class="icon">📊</span>FHS Score Distribution</div>
+              <div class="chart-wrap" style="height:200px"><canvas id="fhsDistChart"></canvas></div>
+            </div>
+            <div class="card">
+              <div class="card-title"><span class="icon">📈</span>FHS Tier Trend Over Time</div>
+              <div class="chart-wrap" style="height:200px"><canvas id="fhsTrendChart"></canvas></div>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title"><span class="icon">💥</span>FHS vs Charge-Off Rate</div>
+              <div class="chart-wrap" style="height:200px"><canvas id="fhsVsCOChart"></canvas></div>
+            </div>
+            <div class="card">
+              <div class="card-title"><span class="icon">🔗</span>FHS vs Avg DPD by Tier</div>
+              <div class="chart-wrap" style="height:200px"><canvas id="fhsVsDPDChart"></canvas></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title"><span class="icon">🏷️</span>Product-wise FHS Distribution</div>
+            <div class="chart-wrap" style="height:220px"><canvas id="fhsProductChart"></canvas></div>
+          </div>
+
+          <!-- Tier Actions -->
+          <div class="card" style="margin-top:16px;">
+            <div class="card-title"><span class="icon">⚡</span>FHS Tier → Recommended Actions</div>
+            <div id="fhsTierActions"></div>
+          </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════
+         TAB 12 · AI ACTIONS
+    ════════════════════════════════════════════════════ -->
+        <div id="tab-actions" class="tab-panel">
+          <div class="page-header">
+            <div class="page-title">AI-Driven Action Recommendations</div>
+            <div class="page-desc">Reinforcement Learning + Uplift Modeling–powered strategy engine for per-segment
+              collection and retention actions.</div>
+          </div>
+
+          <!-- Strategy Engine inputs -->
+          <div class="card"
+            style="margin-bottom:16px; background: linear-gradient(135deg,rgba(139,92,246,0.07),rgba(236,72,153,0.05));">
+            <div class="card-title"><span class="icon">🤖</span>Strategy Engine Inputs</div>
+            <div style="display:flex; gap:24px; flex-wrap:wrap; font-size:0.78rem; color:var(--text-secondary);">
+              <span>✓ Behavioural Segment</span>
+              <span>✓ Charge-Off Prediction Score</span>
+              <span>✓ Vulnerability Score</span>
+              <span>✓ Financial Health Score</span>
+              <span>✓ Contactability Score</span>
+              <span>✓ Risk Drivers (SHAP)</span>
+              <span>✓ Loan Product</span>
+              <span>✓ Customer Income Pattern</span>
+            </div>
+          </div>
+
+          <!-- Action cards -->
+          <div class="grid-2">
+            <div>
+              <h3 class="section-title">Per-Segment Recommendations</h3>
+              <div id="actionCards"></div>
+            </div>
+            <div>
+              <div class="card" style="margin-bottom:16px;">
+                <div class="card-title"><span class="icon">💰</span>Projected Savings by Action</div>
+                <div class="chart-wrap" style="height:200px"><canvas id="roiChart"></canvas></div>
+              </div>
+              <div class="card">
+                <div class="card-title"><span class="icon">📈</span>Projected vs Actual Savings (YTD)</div>
+                <div class="chart-wrap" style="height:200px"><canvas id="roiTimelineChart"></canvas></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:16px;">
+            <div class="card-title"><span class="icon">📊</span>Charge-Off Reduction Potential by Segment</div>
+            <div class="chart-wrap" style="height:200px"><canvas id="coReductionChart"></canvas></div>
+          </div>
+        </div>
+
+      </div><!-- #content -->
+    </div><!-- #main -->
+  </div><!-- #app -->
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="data.js"></script>
+  <script src="charts-a.js"></script>
+  <script src="charts-b.js"></script>
+  <script>
+    // ── Tab switching ────────────────────────────────────────
+    const tabTitles = {
+      portfolio: 'Portfolio Overview',
+      ews: 'Early Warning Risk Signals',
+      dpd: 'DPD Migration & Trends',
+      chargeoff: 'Charge-Off Prediction',
+      loss: 'Estimated Loss Forecast',
+      segments: 'Behavioural Segmentation',
+      product: 'Product-Level Risk View',
+      geo: 'Geographic Risk View',
+      channel: 'Channel Risk View',
+      vulnerability: 'Vulnerability Score',
+      fhs: 'Financial Health Score',
+      actions: 'AI Action Recommendations',
+    };
+    function switchTab(id, el) {
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById('tab-' + id).classList.add('active');
+      el.classList.add('active');
+      document.getElementById('headerTitle').textContent = tabTitles[id];
+    }
+
+    // ── Timestamp ────────────────────────────────────────────
+    function updateTimestamp() {
+      const now = new Date();
+      document.getElementById('tsDisplay').textContent = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+    setInterval(updateTimestamp, 1000);
+    updateTimestamp();
+
+    // ── Refresh ──────────────────────────────────────────────
+    function refreshDashboard() {
+      refreshData();
+      document.getElementById('lastUpdate').textContent = 'just now';
+      renderPortfolioKPIs();
+      if (window._chartInstances) {
+        Object.values(window._chartInstances).forEach(c => { try { c.update(); } catch (e) { } });
+      }
+    }
+
+    function exportCSV() {
+      const rows = [['Customer ID', 'Product', 'DPD', 'PD-30', 'PD-60', 'PD-90', 'Risk Tier']];
+      DashboardData.chargeOff.customers.slice(0, 100).forEach(r => {
+        rows.push([r.id, r.product, r.dpd, r.pd30 + '%', r.pd60 + '%', r.pd90 + '%', r.riskTier]);
+      });
+      const blob = new Blob([rows.map(r => r.join(',')).join('\n')], { type: 'text/csv' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+      a.download = 'cng-risk-export.csv'; a.click();
+    }
+
+    // ── Customer table search ────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('searchCustomer').addEventListener('input', renderCustomerTable);
+    });
+  </script>
+
+  <!-- Theme Toggler Script -->
+  <script>
+    (function initTheme() {
+      const toggleBtn = document.getElementById('themeToggle');
+      const savedTheme = localStorage.getItem('cng-theme');
+
+      if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+      }
+
+      function updateChartColors(isLight) {
+        if (typeof Chart === 'undefined') return;
+
+        // Update Chart.js defaults
+        Chart.defaults.color = isLight ? '#475569' : '#8ba1cc';
+        const newGridColor = isLight ? 'rgba(200, 210, 230, 0.4)' : 'rgba(30,48,85,0.6)';
+        const newTooltipBg = isLight ? '#ffffff' : '#111d35';
+        const newTooltipBorder = isLight ? '#e2e8f0' : '#1e3055';
+        const newTooltipText = isLight ? '#0f172a' : '#fff';
+
+        if (typeof C !== 'undefined') {
+          C.gridLine = newGridColor;
+        }
+
+        // Live update all existing charts
+        if (window._chartInstances) {
+          const axisColor = isLight ? '#475569' : '#8ba1cc';
+          Object.values(window._chartInstances).forEach(chart => {
+            if (chart.options.scales) {
+              ['x', 'y', 'y1', 'r'].forEach(axis => {
+                if (chart.options.scales[axis]) {
+                  if (chart.options.scales[axis].grid) chart.options.scales[axis].grid.color = newGridColor;
+                  if (chart.options.scales[axis].title) chart.options.scales[axis].title.color = axisColor;
+                }
+              });
+            }
+            if (chart.options.plugins && chart.options.plugins.tooltip) {
+              chart.options.plugins.tooltip.backgroundColor = newTooltipBg;
+              chart.options.plugins.tooltip.borderColor = newTooltipBorder;
+              chart.options.plugins.tooltip.titleColor = newTooltipText;
+              chart.options.plugins.tooltip.bodyColor = newTooltipText;
+            }
+            // For pie/doughnut border colors
+            if (['pie', 'doughnut'].includes(chart.config.type)) {
+              chart.data.datasets.forEach(ds => {
+                if (ds.borderColor) ds.borderColor = isLight ? '#ffffff' : '#111d35';
+              });
+            }
+            chart.update();
+          });
+        }
+      }
+
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+          const isNowLight = document.body.classList.toggle('light-theme');
+          localStorage.setItem('cng-theme', isNowLight ? 'light' : 'dark');
+          updateChartColors(isNowLight);
+        });
+      }
+
+      // Run once on load to ensure charts match theme if starting in light mode
+      const isLightStart = document.body.classList.contains('light-theme');
+      if (isLightStart) setTimeout(() => updateChartColors(true), 100);
+    })();
+  </script>
+</body>
+
+</html>
