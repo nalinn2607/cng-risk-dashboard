@@ -6,7 +6,9 @@ Chart.defaults.color = '#94afd4';
 Chart.defaults.font.family = 'Inter';
 Chart.defaults.font.size = 11;
 Chart.defaults.plugins.legend.labels.boxWidth = 10;
-Chart.defaults.plugins.legend.labels.padding = 14;
+Chart.defaults.plugins.legend.labels.padding = 8;
+Chart.defaults.plugins.legend.position = 'bottom';
+Chart.defaults.layout.padding = 0;
 
 const C = {
     blue: '#2563eb', cyan: '#22d3ee', green: '#10b981',
