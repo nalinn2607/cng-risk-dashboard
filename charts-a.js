@@ -22,28 +22,49 @@ function mkChart(id, type, data, opts = {}) {
 
     // Inject Neon Gradients
     const canvasCtx = ctx.getContext('2d');
-    const bGrad = canvasCtx.createLinearGradient(0, 0, 0, 300);
-    bGrad.addColorStop(0, 'rgba(34, 211, 238, 0.9)');    // Cyan
-    bGrad.addColorStop(1, 'rgba(232, 28, 255, 0.9)');    // Magenta
+
+    // Gradient 1: Cyan to Magenta (Primary)
+    const bGrad1 = canvasCtx.createLinearGradient(0, 0, 0, 300);
+    bGrad1.addColorStop(0, 'rgba(34, 211, 238, 0.95)');
+    bGrad1.addColorStop(1, 'rgba(232, 28, 255, 0.95)');
+
+    // Gradient 2: Purple to Pink (Secondary)
+    const bGrad2 = canvasCtx.createLinearGradient(0, 0, 0, 300);
+    bGrad2.addColorStop(0, 'rgba(147, 51, 234, 0.95)');
+    bGrad2.addColorStop(1, 'rgba(236, 72, 153, 0.95)');
+
+    // Gradient 3: Blue to Cyan
+    const bGrad3 = canvasCtx.createLinearGradient(0, 0, 0, 300);
+    bGrad3.addColorStop(0, 'rgba(37, 99, 235, 0.95)');
+    bGrad3.addColorStop(1, 'rgba(34, 211, 238, 0.95)');
+
+    // Gradient 4: Orange to Magenta
+    const bGrad4 = canvasCtx.createLinearGradient(0, 0, 0, 300);
+    bGrad4.addColorStop(0, 'rgba(249, 115, 22, 0.95)');
+    bGrad4.addColorStop(1, 'rgba(232, 28, 255, 0.95)');
+
+    const barGradients = [bGrad1, bGrad2, bGrad3, bGrad4];
 
     const lGrad = canvasCtx.createLinearGradient(0, 0, 0, 300);
     lGrad.addColorStop(0, 'rgba(34, 211, 238, 0.2)');
     lGrad.addColorStop(1, 'rgba(232, 28, 255, 0.05)');
 
+    const lineColors = [C.cyan, C.magenta, C.purple, C.blue, C.pink];
+
     if (data.datasets) {
-        data.datasets.forEach(ds => {
-            if (type === 'bar' && (!ds.backgroundColor || typeof ds.backgroundColor === 'string')) {
-                ds.backgroundColor = bGrad;
-                ds.borderRadius = 6;
+        data.datasets.forEach((ds, i) => {
+            if (type === 'bar') {
+                // Force all bar charts to use global glowing gradients, regardless of their original assigned arrays
+                ds.backgroundColor = barGradients[i % barGradients.length];
+                ds.borderRadius = 8;
                 ds.borderWidth = 0;
             } else if (type === 'line' && ds.fill) {
                 ds.backgroundColor = lGrad;
-                ds.borderColor = C.cyan;
+                ds.borderColor = lineColors[i % lineColors.length];
                 ds.borderWidth = 3;
                 ds.tension = 0.4;
-                // Add inner glow fallback using shadow config properties in chart
             } else if (type === 'line' && !ds.fill) {
-                ds.borderColor = C.magenta;
+                ds.borderColor = lineColors[i % lineColors.length];
                 ds.borderWidth = 3;
                 ds.tension = 0.4;
             }
