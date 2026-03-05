@@ -937,6 +937,13 @@
     font-family: 'Space Grotesk', sans-serif;
   }
 
+  body.light-theme .card thead th {
+    background: rgba(230, 235, 245, 0.8);
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--border);
+    font-weight: 800;
+  }
+
   tbody tr {
     border-bottom: 1px solid rgba(40, 70, 130, 0.2);
     transition: all 0.2s ease-in-out;
