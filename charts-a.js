@@ -9,27 +9,78 @@ Chart.defaults.plugins.legend.labels.boxWidth = 10;
 Chart.defaults.plugins.legend.labels.padding = 14;
 
 const C = {
-    blue: '#1d6ef5', cyan: '#06b6d4', green: '#10b981',
+    blue: '#2563eb', cyan: '#22d3ee', green: '#10b981',
     yellow: '#f59e0b', orange: '#f97316', red: '#ef4444',
-    purple: '#8b5cf6', pink: '#ec4899', teal: '#14b8a6',
-    grid: 'rgba(30,50,90,0.5)'
+    purple: '#9333ea', pink: '#ec4899', magenta: '#e81cff',
+    grid: 'rgba(255,255,255,0.05)'
 };
 
 function mkChart(id, type, data, opts = {}) {
     if (window._chartInstances[id]) window._chartInstances[id].destroy();
     const ctx = document.getElementById(id);
     if (!ctx) return null;
+
+    // Inject Neon Gradients
+    const canvasCtx = ctx.getContext('2d');
+    const bGrad = canvasCtx.createLinearGradient(0, 0, 0, 300);
+    bGrad.addColorStop(0, 'rgba(34, 211, 238, 0.9)');    // Cyan
+    bGrad.addColorStop(1, 'rgba(232, 28, 255, 0.9)');    // Magenta
+
+    const lGrad = canvasCtx.createLinearGradient(0, 0, 0, 300);
+    lGrad.addColorStop(0, 'rgba(34, 211, 238, 0.2)');
+    lGrad.addColorStop(1, 'rgba(232, 28, 255, 0.05)');
+
+    if (data.datasets) {
+        data.datasets.forEach(ds => {
+            if (type === 'bar' && (!ds.backgroundColor || typeof ds.backgroundColor === 'string')) {
+                ds.backgroundColor = bGrad;
+                ds.borderRadius = 6;
+                ds.borderWidth = 0;
+            } else if (type === 'line' && ds.fill) {
+                ds.backgroundColor = lGrad;
+                ds.borderColor = C.cyan;
+                ds.borderWidth = 3;
+                ds.tension = 0.4;
+                // Add inner glow fallback using shadow config properties in chart
+            } else if (type === 'line' && !ds.fill) {
+                ds.borderColor = C.magenta;
+                ds.borderWidth = 3;
+                ds.tension = 0.4;
+            }
+        });
+    }
+
     const base = {
         responsive: true, maintainAspectRatio: false,
         layout: { padding: { bottom: 15, left: 10, right: 10, top: 5 } },
-        plugins: { tooltip: { backgroundColor: '#0c1628', borderColor: '#1e3a68', borderWidth: 1, padding: 10, cornerRadius: 8 }, legend: { display: false } }
+        plugins: {
+            tooltip: { backgroundColor: 'rgba(8, 14, 50, 0.95)', borderColor: 'rgba(232, 28, 255, 0.4)', borderWidth: 1, padding: 10, cornerRadius: 8, titleFont: { family: 'Space Grotesk' }, bodyFont: { family: 'Inter' } },
+            legend: { display: false }
+        }
     };
     if (['bar', 'line', 'scatter'].includes(type)) base.scales = {
-        x: { grid: { color: C.grid }, ticks: { maxRotation: 0, padding: 5 }, title: { display: true, color: '#8ba1cc', font: { size: 10, weight: '700' } } },
-        y: { grid: { color: C.grid }, beginAtZero: false, ticks: { padding: 5 }, title: { display: true, color: '#8ba1cc', font: { size: 10, weight: '700' } } }
+        x: { grid: { color: C.grid }, ticks: { maxRotation: 0, padding: 5, color: '#94a3b8' }, title: { display: true, color: '#ffffff', font: { size: 10, weight: '700' } } },
+        y: { grid: { color: C.grid }, beginAtZero: false, ticks: { padding: 5, color: '#94a3b8' }, title: { display: true, color: '#ffffff', font: { size: 10, weight: '700' } } }
     };
     const merged = deep(base, opts);
-    const inst = new Chart(ctx, { type, data, options: merged });
+
+    // Custom charting plugin to draw global glowing shadow
+    const neonPlugin = {
+        id: 'neonGlow',
+        beforeDatasetsDraw: (chart) => {
+            const cCtx = chart.ctx;
+            cCtx.save();
+            cCtx.shadowColor = 'rgba(34, 211, 238, 0.4)';
+            cCtx.shadowBlur = 15;
+            cCtx.shadowOffsetX = 0;
+            cCtx.shadowOffsetY = 4;
+        },
+        afterDatasetsDraw: (chart) => {
+            chart.ctx.restore();
+        }
+    };
+
+    const inst = new Chart(ctx, { type, data, options: merged, plugins: [neonPlugin] });
     window._chartInstances[id] = inst;
     return inst;
 }

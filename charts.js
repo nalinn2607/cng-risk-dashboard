@@ -4,18 +4,18 @@
 window._chartInstances = {};
 
 // ── Chart.js Defaults ────────────────────────────────────
-Chart.defaults.color = '#8ba1cc';
+Chart.defaults.color = '#94a3b8'; // Premium crisp grey
 Chart.defaults.font.family = 'Inter';
 Chart.defaults.font.size = 11;
 Chart.defaults.plugins.legend.labels.boxWidth = 10;
 Chart.defaults.plugins.legend.labels.padding = 12;
 
 const C = {
-  blue: '#1d6ef5', cyan: '#06b6d4', green: '#10b981',
+  blue: '#2563eb', cyan: '#22d3ee', green: '#10b981',
   yellow: '#f59e0b', orange: '#f97316', red: '#ef4444',
-  purple: '#8b5cf6', pink: '#ec4899', teal: '#14b8a6',
-  ghost: 'rgba(255,255,255,0.06)',
-  gridLine: 'rgba(30,48,85,0.6)',
+  purple: '#9333ea', pink: '#ec4899', magenta: '#e81cff',
+  ghost: 'rgba(255,255,255,0.03)',
+  gridLine: 'rgba(255,255,255,0.05)', // Extremely subtle grid
 };
 
 function makeChart(id, type, data, options = {}) {
@@ -33,7 +33,14 @@ function defaultOpts(type) {
     maintainAspectRatio: false,
     layout: { padding: { top: 5, bottom: 20, left: 20, right: 20 } },
     plugins: {
-      tooltip: { backgroundColor: '#111d35', borderColor: '#1e3055', borderWidth: 1, padding: 10 },
+      tooltip: {
+        backgroundColor: 'rgba(8, 14, 50, 0.95)',
+        borderColor: 'rgba(232, 28, 255, 0.4)',
+        borderWidth: 1,
+        padding: 12,
+        titleFont: { size: 13, family: 'Space Grotesk' },
+        bodyFont: { size: 12, family: 'Inter' }
+      },
       legend: { display: false }
     },
   };
@@ -41,13 +48,13 @@ function defaultOpts(type) {
     base.scales = {
       x: {
         grid: { color: C.gridLine },
-        ticks: { maxRotation: 0, padding: 5 },
-        title: { display: true, color: '#8ba1cc', font: { size: 10, weight: '700' } }
+        ticks: { maxRotation: 0, padding: 5, color: '#94a3b8' },
+        title: { display: true, color: '#ffffff', font: { size: 10, weight: '700', family: 'Inter' } }
       },
       y: {
         grid: { color: C.gridLine },
-        ticks: { padding: 5 },
-        title: { display: true, color: '#8ba1cc', font: { size: 10, weight: '700' } }
+        ticks: { padding: 5, color: '#94a3b8' },
+        title: { display: true, color: '#ffffff', font: { size: 10, weight: '700', family: 'Inter' } }
       },
     };
   }
