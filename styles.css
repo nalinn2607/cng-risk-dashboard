@@ -792,10 +792,15 @@
   .chart-wrap {
     position: relative;
     width: 100%;
+    flex: 1;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
   }
 
   canvas {
     max-width: 100%;
+    flex: 1;
   }
 
   /* ─── Tables — Premium ──────────────────────────────────── */
