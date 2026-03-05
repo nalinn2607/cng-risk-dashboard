@@ -167,7 +167,7 @@ function renderVulnerabilityTab() {
     mkChart('vulnTierChart', 'doughnut', {
         labels: d.tierDist.map(t => t.tier),
         datasets: [{ data: d.tierDist.map(t => t.pct), backgroundColor: d.tierDist.map(t => a(t.color, .82)), borderWidth: 3, borderColor: '#0c1628', hoverOffset: 12 }]
-    }, { plugins: { legend: { display: true, position: 'bottom' } }, cutout: '60%' });
+    }, { plugins: { legend: { display: true, position: 'bottom' } }, cutout: '60%', centerText: 'Tier %' });
 
     mkChart('vulnCategoryChart', 'bar', {
         labels: d.categories.map(c => c.name),

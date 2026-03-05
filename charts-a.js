@@ -42,6 +42,25 @@ function mkChart(id, type, data, opts = {}) {
         return grad;
     }
 
+    function makeArcGradient(colorStr) {
+        if (typeof colorStr !== 'string') return colorStr;
+        let r, g, b;
+        if (colorStr.startsWith('#')) {
+            const hex = colorStr.length === 4 ? '#' + colorStr[1] + colorStr[1] + colorStr[2] + colorStr[2] + colorStr[3] + colorStr[3] : colorStr;
+            r = parseInt(hex.slice(1, 3), 16); g = parseInt(hex.slice(3, 5), 16); b = parseInt(hex.slice(5, 7), 16);
+        } else if (colorStr.startsWith('rgba') || colorStr.startsWith('rgb')) {
+            const m = colorStr.match(/[\d.]+/g);
+            if (!m) return colorStr;
+            r = parseInt(m[0]); g = parseInt(m[1]); b = parseInt(m[2]);
+        } else return colorStr;
+
+        // Diagonal gradient for arcs to give a 3D light-reflection feel
+        const grad = canvasCtx.createLinearGradient(0, 0, 200, 200);
+        grad.addColorStop(0, `rgba(${r},${g},${b}, 1)`);
+        grad.addColorStop(1, `rgba(${r},${g},${b}, 0.3)`);
+        return grad;
+    }
+
     const lGrad = canvasCtx.createLinearGradient(0, 0, 0, 300);
     lGrad.addColorStop(0, 'rgba(34, 211, 238, 0.2)');
     lGrad.addColorStop(1, 'rgba(232, 28, 255, 0.05)');
@@ -72,6 +91,15 @@ function mkChart(id, type, data, opts = {}) {
                 ds.borderColor = lineColors[i % lineColors.length];
                 ds.borderWidth = 3;
                 ds.tension = 0.4;
+            } else if (type === 'doughnut' || type === 'pie') {
+                if (Array.isArray(ds.backgroundColor)) {
+                    ds.backgroundColor = ds.backgroundColor.map(c => makeArcGradient(c));
+                } else if (ds.backgroundColor) {
+                    ds.backgroundColor = makeArcGradient(ds.backgroundColor);
+                }
+                ds.borderWidth = 4; // Thick borders for 3D separation
+                ds.borderColor = 'rgba(4, 9, 20, 0.9)'; // Deep navy gap
+                ds.hoverOffset = 15; // Explode out on hover
             }
         });
     }
@@ -94,19 +122,47 @@ function mkChart(id, type, data, opts = {}) {
     const neonPlugin = {
         id: 'neonGlow',
         beforeDatasetsDraw: (chart) => {
+            if (chart.config.type !== 'line' && chart.config.type !== 'bar' && chart.config.type !== 'doughnut') return;
             const cCtx = chart.ctx;
             cCtx.save();
-            cCtx.shadowColor = 'rgba(34, 211, 238, 0.4)';
+            cCtx.shadowColor = chart.config.type === 'doughnut' ? 'rgba(232, 28, 255, 0.25)' : 'rgba(34, 211, 238, 0.4)';
             cCtx.shadowBlur = 15;
             cCtx.shadowOffsetX = 0;
             cCtx.shadowOffsetY = 4;
+            if (chart.config.type === 'doughnut') cCtx.shadowOffsetY = 0; // Center glow for rings
         },
         afterDatasetsDraw: (chart) => {
             chart.ctx.restore();
         }
     };
 
-    const inst = new Chart(ctx, { type, data, options: merged, plugins: [neonPlugin] });
+    // Advanced Center Text Plugin for Doughnuts
+    const centerTextPlugin = {
+        id: 'centerTextPlugin',
+        beforeDraw: (chart) => {
+            if (chart.config.type !== 'doughnut' || !chart.config.options.centerText) return;
+            const width = chart.chartArea.right - chart.chartArea.left;
+            const height = chart.chartArea.bottom - chart.chartArea.top;
+            const ctx = chart.ctx;
+
+            ctx.restore();
+            const fontSize = (height / 80).toFixed(2);
+            ctx.font = `900 ${fontSize}em "Space Grotesk", sans-serif`;
+            ctx.textBaseline = "middle";
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowColor = 'rgba(34, 211, 238, 0.6)';
+            ctx.shadowBlur = 12;
+
+            const text = chart.config.options.centerText;
+            const textX = chart.chartArea.left + Math.round((width - ctx.measureText(text).width) / 2);
+            const textY = chart.chartArea.top + Math.round(height / 2);
+
+            ctx.fillText(text, textX, textY);
+            ctx.save();
+        }
+    };
+
+    const inst = new Chart(ctx, { type, data, options: merged, plugins: [neonPlugin, centerTextPlugin] });
     window._chartInstances[id] = inst;
     return inst;
 }
@@ -215,7 +271,7 @@ function renderPortfolioCharts() {
             data: d.productMix.map(p => p.pct), backgroundColor: [C.blue, C.cyan, C.purple, C.orange],
             hoverOffset: 12, borderWidth: 3, borderColor: '#0c1628'
         }]
-    }, { plugins: { legend: { display: true, position: 'bottom' } }, cutout: '68%' });
+    }, { plugins: { legend: { display: true, position: 'bottom' } }, cutout: '68%', centerText: 'Mix %' });
 
     mkChart('rollRateChart', 'bar', {
         labels: ['0→30', '30→60', '60→90', '90+→CO'],
