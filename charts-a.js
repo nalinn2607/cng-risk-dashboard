@@ -20,30 +20,27 @@ function mkChart(id, type, data, opts = {}) {
     const ctx = document.getElementById(id);
     if (!ctx) return null;
 
-    // Inject Neon Gradients
+    // Smart Gradient Upgrader
     const canvasCtx = ctx.getContext('2d');
 
-    // Gradient 1: Cyan to Magenta (Primary)
-    const bGrad1 = canvasCtx.createLinearGradient(0, 0, 0, 300);
-    bGrad1.addColorStop(0, 'rgba(34, 211, 238, 0.95)');
-    bGrad1.addColorStop(1, 'rgba(232, 28, 255, 0.95)');
+    function makeBarGradient(colorStr) {
+        if (typeof colorStr !== 'string') return colorStr;
+        let r, g, b;
+        if (colorStr.startsWith('#')) {
+            const hex = colorStr.length === 4 ? '#' + colorStr[1] + colorStr[1] + colorStr[2] + colorStr[2] + colorStr[3] + colorStr[3] : colorStr;
+            r = parseInt(hex.slice(1, 3), 16); g = parseInt(hex.slice(3, 5), 16); b = parseInt(hex.slice(5, 7), 16);
+        } else if (colorStr.startsWith('rgba') || colorStr.startsWith('rgb')) {
+            const m = colorStr.match(/[\d.]+/g);
+            if (!m) return colorStr;
+            r = parseInt(m[0]); g = parseInt(m[1]); b = parseInt(m[2]);
+        } else return colorStr;
 
-    // Gradient 2: Purple to Pink (Secondary)
-    const bGrad2 = canvasCtx.createLinearGradient(0, 0, 0, 300);
-    bGrad2.addColorStop(0, 'rgba(147, 51, 234, 0.95)');
-    bGrad2.addColorStop(1, 'rgba(236, 72, 153, 0.95)');
-
-    // Gradient 3: Blue to Cyan
-    const bGrad3 = canvasCtx.createLinearGradient(0, 0, 0, 300);
-    bGrad3.addColorStop(0, 'rgba(37, 99, 235, 0.95)');
-    bGrad3.addColorStop(1, 'rgba(34, 211, 238, 0.95)');
-
-    // Gradient 4: Orange to Magenta
-    const bGrad4 = canvasCtx.createLinearGradient(0, 0, 0, 300);
-    bGrad4.addColorStop(0, 'rgba(249, 115, 22, 0.95)');
-    bGrad4.addColorStop(1, 'rgba(232, 28, 255, 0.95)');
-
-    const barGradients = [bGrad1, bGrad2, bGrad3, bGrad4];
+        const grad = canvasCtx.createLinearGradient(0, 0, 0, 350);
+        grad.addColorStop(0, `rgba(${r},${g},${b}, 1)`);      // Solid glowing top
+        grad.addColorStop(0.5, `rgba(${r},${g},${b}, 0.5)`);  // Smooth fade
+        grad.addColorStop(1, `rgba(${r},${g},${b}, 0.05)`);     // Transparent base
+        return grad;
+    }
 
     const lGrad = canvasCtx.createLinearGradient(0, 0, 0, 300);
     lGrad.addColorStop(0, 'rgba(34, 211, 238, 0.2)');
@@ -54,10 +51,18 @@ function mkChart(id, type, data, opts = {}) {
     if (data.datasets) {
         data.datasets.forEach((ds, i) => {
             if (type === 'bar') {
-                // Force all bar charts to use global glowing gradients, regardless of their original assigned arrays
-                ds.backgroundColor = barGradients[i % barGradients.length];
-                ds.borderRadius = 8;
+                // Dynamically upgrade assigned colors to premium gradients
+                if (Array.isArray(ds.backgroundColor)) {
+                    ds.backgroundColor = ds.backgroundColor.map(c => makeBarGradient(c));
+                } else if (ds.backgroundColor) {
+                    ds.backgroundColor = makeBarGradient(ds.backgroundColor);
+                } else {
+                    ds.backgroundColor = makeBarGradient(lineColors[i % lineColors.length]);
+                }
+                ds.borderRadius = { topLeft: 6, topRight: 6, bottomLeft: 0, bottomRight: 0 };
                 ds.borderWidth = 0;
+                ds.barPercentage = 0.65; // Sleek, thinner bars
+                ds.categoryPercentage = 0.8;
             } else if (type === 'line' && ds.fill) {
                 ds.backgroundColor = lGrad;
                 ds.borderColor = lineColors[i % lineColors.length];
