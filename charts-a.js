@@ -54,10 +54,10 @@ function mkChart(id, type, data, opts = {}) {
             r = parseInt(m[0]); g = parseInt(m[1]); b = parseInt(m[2]);
         } else return colorStr;
 
-        // Diagonal gradient for arcs to give a 3D light-reflection feel
-        const grad = canvasCtx.createLinearGradient(0, 0, 200, 200);
+        // Vertical gradient for arcs to keep colors bright and punchy
+        const grad = canvasCtx.createLinearGradient(0, 0, 0, 400);
         grad.addColorStop(0, `rgba(${r},${g},${b}, 1)`);
-        grad.addColorStop(1, `rgba(${r},${g},${b}, 0.3)`);
+        grad.addColorStop(1, `rgba(${r},${g},${b}, 0.7)`);
         return grad;
     }
 
