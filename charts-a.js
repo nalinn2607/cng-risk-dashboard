@@ -54,10 +54,10 @@ function mkChart(id, type, data, opts = {}) {
             r = parseInt(m[0]); g = parseInt(m[1]); b = parseInt(m[2]);
         } else return colorStr;
 
-        // Vertical gradient for arcs to keep colors bright and punchy
-        const grad = canvasCtx.createLinearGradient(0, 0, 0, 400);
+        // High-vibrancy neon gradient
+        const grad = canvasCtx.createLinearGradient(0, 0, 0, 300);
         grad.addColorStop(0, `rgba(${r},${g},${b}, 1)`);
-        grad.addColorStop(1, `rgba(${r},${g},${b}, 0.7)`);
+        grad.addColorStop(1, `rgba(${r},${g},${b}, 0.85)`);
         return grad;
     }
 
@@ -125,13 +125,20 @@ function mkChart(id, type, data, opts = {}) {
             if (chart.config.type !== 'line' && chart.config.type !== 'bar' && chart.config.type !== 'doughnut') return;
             const cCtx = chart.ctx;
             cCtx.save();
-            cCtx.shadowColor = chart.config.type === 'doughnut' ? 'rgba(232, 28, 255, 0.25)' : 'rgba(34, 211, 238, 0.4)';
+
+            // Boost vibrancy for doughnuts
+            if (chart.config.type === 'doughnut') {
+                cCtx.filter = 'saturate(1.4) brightness(1.1)';
+            }
+
+            cCtx.shadowColor = chart.config.type === 'doughnut' ? 'rgba(232, 28, 255, 0.4)' : 'rgba(34, 211, 238, 0.4)';
             cCtx.shadowBlur = 15;
             cCtx.shadowOffsetX = 0;
             cCtx.shadowOffsetY = 4;
-            if (chart.config.type === 'doughnut') cCtx.shadowOffsetY = 0; // Center glow for rings
+            if (chart.config.type === 'doughnut') cCtx.shadowOffsetY = 0;
         },
         afterDatasetsDraw: (chart) => {
+            chart.ctx.filter = 'none';
             chart.ctx.restore();
         }
     };
@@ -146,14 +153,16 @@ function mkChart(id, type, data, opts = {}) {
             const ctx = chart.ctx;
 
             ctx.restore();
-            const fontSize = (height / 80).toFixed(2);
-            ctx.font = `900 ${fontSize}em "Space Grotesk", sans-serif`;
+            // Elegant, smaller subtitle font
+            const fontSize = (height / 140).toFixed(2);
+            ctx.font = `700 ${fontSize}em "Inter", sans-serif`;
             ctx.textBaseline = "middle";
-            ctx.fillStyle = '#ffffff';
-            ctx.shadowColor = 'rgba(34, 211, 238, 0.6)';
-            ctx.shadowBlur = 12;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+            ctx.shadowColor = 'rgba(34, 211, 238, 0.3)';
+            ctx.shadowBlur = 8;
+            ctx.letterSpacing = "2px";
 
-            const text = chart.config.options.centerText;
+            const text = chart.config.options.centerText.toUpperCase();
             const textX = chart.chartArea.left + Math.round((width - ctx.measureText(text).width) / 2);
             const textY = chart.chartArea.top + Math.round(height / 2);
 
@@ -271,7 +280,7 @@ function renderPortfolioCharts() {
             data: d.productMix.map(p => p.pct), backgroundColor: [C.blue, C.cyan, C.purple, C.orange],
             hoverOffset: 12, borderWidth: 3, borderColor: '#0c1628'
         }]
-    }, { plugins: { legend: { display: true, position: 'bottom' } }, cutout: '68%', centerText: 'Mix %' });
+    }, { plugins: { legend: { display: true, position: 'bottom' } }, cutout: '65%' });
 
     mkChart('rollRateChart', 'bar', {
         labels: ['0→30', '30→60', '60→90', '90+→CO'],
