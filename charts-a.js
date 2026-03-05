@@ -108,7 +108,7 @@ function mkChart(id, type, data, opts = {}) {
 
     const base = {
         responsive: true, maintainAspectRatio: false,
-        layout: { padding: { bottom: 15, left: 10, right: 10, top: 5 } },
+        layout: { padding: { bottom: 5, left: 2, right: 2, top: 2 } },
         plugins: {
             tooltip: { backgroundColor: 'rgba(8, 14, 50, 0.95)', borderColor: 'rgba(232, 28, 255, 0.4)', borderWidth: 1, padding: 10, cornerRadius: 8, titleFont: { family: 'Space Grotesk' }, bodyFont: { family: 'Inter' } },
             legend: { display: false }
