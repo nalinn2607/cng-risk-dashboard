@@ -116,7 +116,7 @@ function mkChart(id, type, data, opts = {}) {
     };
     if (['bar', 'line', 'scatter'].includes(type)) base.scales = {
         x: { grid: { color: C.grid }, ticks: { maxRotation: 0, padding: 5, color: '#94a3b8' }, title: { display: true, color: '#ffffff', font: { size: 10, weight: '700' } } },
-        y: { grid: { color: C.grid }, beginAtZero: false, ticks: { padding: 5, color: '#94a3b8' }, title: { display: true, color: '#ffffff', font: { size: 10, weight: '700' } } }
+        y: { grid: { color: C.grid }, beginAtZero: true, ticks: { padding: 5, color: '#94a3b8' }, title: { display: true, color: '#ffffff', font: { size: 10, weight: '700' } } }
     };
     const merged = deep(base, opts);
 
