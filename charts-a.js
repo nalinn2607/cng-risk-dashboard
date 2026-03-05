@@ -80,8 +80,8 @@ function mkChart(id, type, data, opts = {}) {
                 }
                 ds.borderRadius = { topLeft: 6, topRight: 6, bottomLeft: 0, bottomRight: 0 };
                 ds.borderWidth = 0;
-                ds.barPercentage = 0.65; // Sleek, thinner bars
-                ds.categoryPercentage = 0.8;
+                ds.barPercentage = 0.72;
+                ds.categoryPercentage = 0.88;
             } else if (type === 'line' && ds.fill) {
                 ds.backgroundColor = lGrad;
                 ds.borderColor = lineColors[i % lineColors.length];
@@ -131,10 +131,10 @@ function mkChart(id, type, data, opts = {}) {
                 cCtx.filter = 'saturate(1.4) brightness(1.1)';
             }
 
-            cCtx.shadowColor = chart.config.type === 'doughnut' ? 'rgba(232, 28, 255, 0.4)' : 'rgba(34, 211, 238, 0.4)';
-            cCtx.shadowBlur = 15;
+            cCtx.shadowColor = chart.config.type === 'doughnut' ? 'rgba(232, 28, 255, 0.4)' : 'rgba(34, 211, 238, 0.5)';
+            cCtx.shadowBlur = 18;
             cCtx.shadowOffsetX = 0;
-            cCtx.shadowOffsetY = 4;
+            cCtx.shadowOffsetY = 5;
             if (chart.config.type === 'doughnut') cCtx.shadowOffsetY = 0;
         },
         afterDatasetsDraw: (chart) => {
