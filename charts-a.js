@@ -6,9 +6,7 @@ Chart.defaults.color = '#94afd4';
 Chart.defaults.font.family = 'Inter';
 Chart.defaults.font.size = 11;
 Chart.defaults.plugins.legend.labels.boxWidth = 10;
-Chart.defaults.plugins.legend.labels.padding = 8;
-Chart.defaults.plugins.legend.position = 'bottom';
-Chart.defaults.layout.padding = 0;
+Chart.defaults.plugins.legend.labels.padding = 14;
 
 const C = {
     blue: '#2563eb', cyan: '#22d3ee', green: '#10b981',
@@ -108,7 +106,7 @@ function mkChart(id, type, data, opts = {}) {
 
     const base = {
         responsive: true, maintainAspectRatio: false,
-        layout: { padding: { bottom: 5, left: 2, right: 2, top: 2 } },
+        layout: { padding: { bottom: 15, left: 10, right: 10, top: 5 } },
         plugins: {
             tooltip: { backgroundColor: 'rgba(8, 14, 50, 0.95)', borderColor: 'rgba(232, 28, 255, 0.4)', borderWidth: 1, padding: 10, cornerRadius: 8, titleFont: { family: 'Space Grotesk' }, bodyFont: { family: 'Inter' } },
             legend: { display: false }
@@ -116,7 +114,7 @@ function mkChart(id, type, data, opts = {}) {
     };
     if (['bar', 'line', 'scatter'].includes(type)) base.scales = {
         x: { grid: { color: C.grid }, ticks: { maxRotation: 0, padding: 5, color: '#94a3b8' }, title: { display: true, color: '#ffffff', font: { size: 10, weight: '700' } } },
-        y: { grid: { color: C.grid }, beginAtZero: true, ticks: { padding: 5, color: '#94a3b8' }, title: { display: true, color: '#ffffff', font: { size: 10, weight: '700' } } }
+        y: { grid: { color: C.grid }, beginAtZero: false, ticks: { padding: 5, color: '#94a3b8' }, title: { display: true, color: '#ffffff', font: { size: 10, weight: '700' } } }
     };
     const merged = deep(base, opts);
 
