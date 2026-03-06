@@ -122,13 +122,12 @@ function renderChannelTab() {
         labels: d[0].trend.map(t => t.month),
         datasets: d.map((ch, i) => ({
             label: ch.channel, data: ch.trend.map(t => t.dpd),
-            borderColor: [C.blue, C.cyan][i], backgroundColor: a([C.blue, C.cyan][i], .08), fill: i === 0, tension: .4
+            borderColor: [C.cyan, C.magenta][i], backgroundColor: a([C.cyan, C.magenta][i], .08), fill: i === 0
         }))
     }, {
-        plugins: { legend: { display: true } },
         scales: {
             x: { title: { text: 'Reporting Month' } },
-            y: { title: { text: 'Average DPD' }, beginAtZero: false }
+            y: { title: { text: 'Average DPD' } }
         }
     });
 
@@ -136,13 +135,12 @@ function renderChannelTab() {
         labels: d[0].trend.map(t => t.month),
         datasets: d.map((ch, i) => ({
             label: ch.channel, data: ch.trend.map(t => t.co),
-            borderColor: [C.orange, C.purple][i], fill: false, tension: .4
+            borderColor: [C.magenta, C.purple][i], fill: false
         }))
     }, {
-        plugins: { legend: { display: true } },
         scales: {
             x: { title: { text: 'Reporting Month' } },
-            y: { title: { text: 'Charge-Off Rate' }, ticks: { callback: v => v + '%' }, beginAtZero: false }
+            y: { title: { text: 'Charge-Off Rate' }, ticks: { callback: v => v + '%' } }
         }
     });
 
@@ -229,17 +227,16 @@ function renderFHSTab() {
     mkChart('fhsTrendChart', 'line', {
         labels: d.trend.map(t => t.month),
         datasets: [
-            { label: 'Excellent', data: d.trend.map(t => t.excellent), borderColor: C.green, fill: false, tension: .4 },
-            { label: 'Good', data: d.trend.map(t => t.good), borderColor: C.blue, fill: false, tension: .4 },
-            { label: 'Watchlist', data: d.trend.map(t => t.watchlist), borderColor: C.yellow, fill: false, tension: .4 },
-            { label: 'High Risk', data: d.trend.map(t => t.highRisk), borderColor: C.orange, fill: false, tension: .4 },
-            { label: 'Critical', data: d.trend.map(t => t.critical), borderColor: C.red, fill: false, tension: .4 },
+            { label: 'Excellent', data: d.trend.map(t => t.excellent), borderColor: C.green, fill: false },
+            { label: 'Good', data: d.trend.map(t => t.good), borderColor: C.cyan, fill: false },
+            { label: 'Watchlist', data: d.trend.map(t => t.watchlist), borderColor: C.yellow, fill: false },
+            { label: 'High Risk', data: d.trend.map(t => t.orange), borderColor: C.orange, fill: false },
+            { label: 'Critical', data: d.trend.map(t => t.critical), borderColor: C.red, fill: false },
         ]
     }, {
-        plugins: { legend: { display: true } },
         scales: {
             x: { title: { text: 'Monthly Trend' } },
-            y: { title: { text: 'FHS Tier %' }, ticks: { callback: v => v + '%' }, beginAtZero: false }
+            y: { title: { text: 'FHS Tier %' }, ticks: { callback: v => v + '%' } }
         }
     });
 
@@ -253,7 +250,7 @@ function renderFHSTab() {
     }, {
         scales: {
             x: { title: { text: 'FHS Bucket' }, ticks: { maxRotation: 45 } },
-            y: { title: { text: 'Expected CO %' }, ticks: { callback: v => v + '%' }, beginAtZero: true }
+            y: { title: { text: 'Expected CO %' }, ticks: { callback: v => v + '%' } }
         }
     });
 
@@ -342,14 +339,13 @@ function renderActionsTab() {
     mkChart('roiTimelineChart', 'line', {
         labels: d.roiTimeline.map(m => m.month),
         datasets: [
-            { label: 'Projected', data: d.roiTimeline.map(m => m.projected / 1e6), borderColor: C.blue, fill: false, tension: .4, borderDash: [5, 4] },
-            { label: 'Actual', data: d.roiTimeline.map(m => m.actual != null ? m.actual / 1e6 : null), borderColor: C.green, fill: false, tension: .4, spanGaps: false },
+            { label: 'Projected', data: d.roiTimeline.map(m => m.projected / 1e6), borderColor: C.cyan, fill: false, borderDash: [5, 4] },
+            { label: 'Actual', data: d.roiTimeline.map(m => m.actual != null ? m.actual / 1e6 : null), borderColor: C.green, fill: false, spanGaps: false },
         ]
     }, {
-        plugins: { legend: { display: true } },
         scales: {
             x: { title: { text: 'Monthly Performance' } },
-            y: { title: { text: 'Realized Savings ($M)' }, ticks: { callback: v => '$' + v + 'M' }, beginAtZero: false }
+            y: { title: { text: 'Realized Savings ($M)' }, ticks: { callback: v => '$' + v + 'M' } }
         }
     });
 

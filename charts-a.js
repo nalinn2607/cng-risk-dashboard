@@ -20,103 +20,69 @@ function mkChart(id, type, data, opts = {}) {
     const ctx = document.getElementById(id);
     if (!ctx) return null;
 
-    // Smart Gradient Upgrader
     const canvasCtx = ctx.getContext('2d');
 
-    function makeBarGradient(colorStr) {
-        if (typeof colorStr !== 'string') return colorStr;
-        let r, g, b;
-        if (colorStr.startsWith('#')) {
-            const hex = colorStr.length === 4 ? '#' + colorStr[1] + colorStr[1] + colorStr[2] + colorStr[2] + colorStr[3] + colorStr[3] : colorStr;
-            r = parseInt(hex.slice(1, 3), 16); g = parseInt(hex.slice(3, 5), 16); b = parseInt(hex.slice(5, 7), 16);
-        } else if (colorStr.startsWith('rgba') || colorStr.startsWith('rgb')) {
-            const m = colorStr.match(/[\d.]+/g);
-            if (!m) return colorStr;
-            r = parseInt(m[0]); g = parseInt(m[1]); b = parseInt(m[2]);
-        } else return colorStr;
+    const base = {
+        responsive: true, maintainAspectRatio: false,
+        layout: { padding: { bottom: 10, left: 0, right: 10, top: 0 } },
+        plugins: {
+            tooltip: { backgroundColor: 'rgba(8, 14, 50, 0.95)', borderColor: 'rgba(232, 28, 255, 0.4)', borderWidth: 1, padding: 10, cornerRadius: 8, titleFont: { family: 'Space Grotesk' }, bodyFont: { family: 'Inter' } },
+            legend: { display: true, position: 'top', align: 'center', labels: { usePointStyle: true, boxWidth: 6, padding: 20, color: '#ffffff', font: { size: 11, weight: '600' } } }
+        }
+    };
 
-        const grad = canvasCtx.createLinearGradient(0, 0, 0, 350);
-        grad.addColorStop(0, `rgba(${r},${g},${b}, 1)`);      // Solid glowing top
-        grad.addColorStop(0.5, `rgba(${r},${g},${b}, 0.5)`);  // Smooth fade
-        grad.addColorStop(1, `rgba(${r},${g},${b}, 0.05)`);     // Transparent base
-        return grad;
+    if (['bar', 'line', 'scatter'].includes(type)) {
+        base.scales = {
+            x: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { maxRotation: 0, padding: 5, color: '#94a3b8' }, title: { display: false, color: '#ffffff', font: { size: 10, weight: '700' } } },
+            y: {
+                grid: { color: 'rgba(255,255,255,0.03)' }, beginAtZero: false, ticks: { padding: 8, color: '#ffffff', font: { size: 10 } },
+                title: { display: false },
+                afterFit: (scale) => { scale.width = 60; } // FORCE ALIGNMENT
+            }
+        };
     }
 
-    function makeArcGradient(colorStr) {
-        if (typeof colorStr !== 'string') return colorStr;
-        let r, g, b;
-        if (colorStr.startsWith('#')) {
-            const hex = colorStr.length === 4 ? '#' + colorStr[1] + colorStr[1] + colorStr[2] + colorStr[2] + colorStr[3] + colorStr[3] : colorStr;
-            r = parseInt(hex.slice(1, 3), 16); g = parseInt(hex.slice(3, 5), 16); b = parseInt(hex.slice(5, 7), 16);
-        } else if (colorStr.startsWith('rgba') || colorStr.startsWith('rgb')) {
-            const m = colorStr.match(/[\d.]+/g);
-            if (!m) return colorStr;
-            r = parseInt(m[0]); g = parseInt(m[1]); b = parseInt(m[2]);
-        } else return colorStr;
+    const merged = deep(base, opts);
 
-        // High-vibrancy neon gradient
-        const grad = canvasCtx.createLinearGradient(0, 0, 0, 300);
-        grad.addColorStop(0, `rgba(${r},${g},${b}, 1)`);
-        grad.addColorStop(1, `rgba(${r},${g},${b}, 0.85)`);
-        return grad;
-    }
-
+    // Cyberpunk Gradient
     const lGrad = canvasCtx.createLinearGradient(0, 0, 0, 300);
-    lGrad.addColorStop(0, 'rgba(34, 211, 238, 0.2)');
-    lGrad.addColorStop(1, 'rgba(232, 28, 255, 0.05)');
-
+    lGrad.addColorStop(0, 'rgba(34, 211, 238, 0.5)'); // Strong glowing top
+    lGrad.addColorStop(1, 'rgba(232, 28, 255, 0.02)'); // Fades into dark navy
     const lineColors = [C.cyan, C.magenta, C.purple, C.blue, C.pink];
 
     if (data.datasets) {
         data.datasets.forEach((ds, i) => {
+            const defColor = lineColors[i % lineColors.length];
             if (type === 'bar') {
-                // Dynamically upgrade assigned colors to premium gradients
-                if (Array.isArray(ds.backgroundColor)) {
-                    ds.backgroundColor = ds.backgroundColor.map(c => makeBarGradient(c));
-                } else if (ds.backgroundColor) {
-                    ds.backgroundColor = makeBarGradient(ds.backgroundColor);
-                } else {
-                    ds.backgroundColor = makeBarGradient(lineColors[i % lineColors.length]);
-                }
-                ds.borderRadius = { topLeft: 6, topRight: 6, bottomLeft: 0, bottomRight: 0 };
-                ds.borderWidth = 0;
-                ds.barPercentage = 0.72;
-                ds.categoryPercentage = 0.88;
-            } else if (type === 'line' && ds.fill) {
-                ds.backgroundColor = lGrad;
-                ds.borderColor = lineColors[i % lineColors.length];
+                if (!ds.backgroundColor) ds.backgroundColor = makeBarGradient(canvasCtx, defColor);
+                else if (typeof ds.backgroundColor === 'string') ds.backgroundColor = makeBarGradient(canvasCtx, ds.backgroundColor);
+                ds.borderRadius = { topLeft: 4, topRight: 4, bottomLeft: 0, bottomRight: 0 };
+                ds.barPercentage = 0.55;
+            } else if (type === 'line') {
+                if (!ds.borderColor) ds.borderColor = defColor;
+                if (ds.fill === true) ds.backgroundColor = lGrad;
                 ds.borderWidth = 3;
-                ds.tension = 0.4;
-            } else if (type === 'line' && !ds.fill) {
-                ds.borderColor = lineColors[i % lineColors.length];
-                ds.borderWidth = 3;
-                ds.tension = 0.4;
+                ds.pointStyle = 'rectRounded';
+                ds.pointRadius = 4;
+                ds.pointBorderWidth = 2;
+                ds.pointBackgroundColor = '#01011A'; // Dark center
+                ds.pointHoverRadius = 6;
+                ds.tension = 0; // Straight, stark angular lines
             } else if (type === 'doughnut' || type === 'pie') {
-                if (Array.isArray(ds.backgroundColor)) {
-                    ds.backgroundColor = ds.backgroundColor.map(c => makeArcGradient(c));
-                } else if (ds.backgroundColor) {
-                    ds.backgroundColor = makeArcGradient(ds.backgroundColor);
-                }
-                ds.borderWidth = 4; // Thick borders for 3D separation
-                ds.borderColor = 'rgba(4, 9, 20, 0.9)'; // Deep navy gap
-                ds.hoverOffset = 15; // Explode out on hover
+                ds.borderWidth = 3;
+                ds.borderColor = '#040914';
             }
         });
     }
 
-    const base = {
-        responsive: true, maintainAspectRatio: false,
-        layout: { padding: { bottom: 15, left: 10, right: 10, top: 5 } },
-        plugins: {
-            tooltip: { backgroundColor: 'rgba(8, 14, 50, 0.95)', borderColor: 'rgba(232, 28, 255, 0.4)', borderWidth: 1, padding: 10, cornerRadius: 8, titleFont: { family: 'Space Grotesk' }, bodyFont: { family: 'Inter' } },
-            legend: { display: false }
-        }
-    };
-    if (['bar', 'line', 'scatter'].includes(type)) base.scales = {
-        x: { grid: { color: C.grid }, ticks: { maxRotation: 0, padding: 5, color: '#94a3b8' }, title: { display: true, color: '#ffffff', font: { size: 10, weight: '700' } } },
-        y: { grid: { color: C.grid }, beginAtZero: false, ticks: { padding: 5, color: '#94a3b8' }, title: { display: true, color: '#ffffff', font: { size: 10, weight: '700' } } }
-    };
-    const merged = deep(base, opts);
+    function makeBarGradient(c, colorStr) {
+        const hex = colorStr.startsWith('#') ? colorStr : '#22d3ee';
+        const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+        const grad = c.createLinearGradient(0, 0, 0, 300);
+        grad.addColorStop(0, `rgba(${r},${g},${b},1)`);
+        grad.addColorStop(1, `rgba(${r},${g},${b},0.15)`);
+        return grad;
+    }
 
     // Custom charting plugin to draw global glowing shadow
     const neonPlugin = {
@@ -262,9 +228,9 @@ function renderPortfolioCharts() {
     mkChart('portfolioTrendChart', 'line', {
         labels: d.trend.map(t => t.month),
         datasets: [
-            { label: 'Total Loans', data: d.trend.map(t => t.totalLoans), borderColor: C.blue, backgroundColor: a(C.blue, .1), fill: true, tension: .4, yAxisID: 'y', pointRadius: 3 },
-            { label: 'Charge-Off %', data: d.trend.map(t => t.chargeOff), borderColor: C.red, backgroundColor: a(C.red, .07), fill: true, tension: .4, yAxisID: 'y1', pointRadius: 3 },
-            { label: 'Recovery %', data: d.trend.map(t => t.recovery), borderColor: C.green, fill: false, tension: .4, yAxisID: 'y1', borderDash: [4, 3], pointRadius: 2 },
+            { label: 'Total Loans', data: d.trend.map(t => t.totalLoans), borderColor: C.cyan, fill: true, yAxisID: 'y' },
+            { label: 'Charge-Off %', data: d.trend.map(t => t.chargeOff), borderColor: C.magenta, fill: false, yAxisID: 'y1' },
+            { label: 'Recovery %', data: d.trend.map(t => t.recovery), borderColor: C.purple, fill: false, yAxisID: 'y1', borderDash: [4, 3] },
         ]
     }, {
         plugins: { legend: { display: true } }, scales: {
@@ -292,7 +258,7 @@ function renderPortfolioCharts() {
     }, {
         scales: {
             x: { title: { text: 'Transition' } },
-            y: { title: { text: 'Roll Rate %' }, ticks: { callback: v => v + '%' }, beginAtZero: true }
+            y: { title: { text: 'Roll Rate %' }, ticks: { callback: v => v + '%' } }
         }
     });
 
@@ -330,7 +296,7 @@ function renderEWSTab() {
     }, {
         scales: {
             x: { title: { text: 'EWS Score Range' }, ticks: { maxRotation: 45 } },
-            y: { title: { text: 'Customer Count' }, ticks: { callback: v => fmtK(v) }, beginAtZero: true }
+            y: { title: { text: 'Customer Count' } }
         }
     });
 
@@ -338,16 +304,15 @@ function renderEWSTab() {
     mkChart('ewsTrendChart', 'line', {
         labels: T.map(t => t.date),
         datasets: [
-            { label: 'High Risk', data: T.map(t => t.highRisk), borderColor: C.red, backgroundColor: a(C.red, .08), fill: true, tension: .4, pointRadius: 3 },
-            { label: 'NSF Events', data: T.map(t => t.nsf), borderColor: C.orange, fill: false, tension: .4, borderDash: [4, 3], pointRadius: 2 },
-            { label: 'Call Avoid', data: T.map(t => t.callAvoidance), borderColor: C.purple, fill: false, tension: .4, borderDash: [4, 3], pointRadius: 2 },
-            { label: 'Stacking', data: T.map(t => t.loanStacking || 0), borderColor: C.pink, fill: false, tension: .4, borderDash: [2, 4], pointRadius: 2 },
+            { label: 'High Risk', data: T.map(t => t.highRisk), borderColor: C.cyan, fill: true },
+            { label: 'NSF Events', data: T.map(t => t.nsf), borderColor: C.magenta, fill: false, borderDash: [4, 3] },
+            { label: 'Call Avoid', data: T.map(t => t.callAvoidance), borderColor: C.purple, fill: false, borderDash: [4, 3] },
+            { label: 'Stacking', data: T.map(t => t.loanStacking || 0), borderColor: C.blue, fill: false, borderDash: [2, 4] },
         ]
     }, {
-        plugins: { legend: { display: true } },
         scales: {
             x: { title: { text: 'Observed Date' }, ticks: { maxTicksLimit: 10 } },
-            y: { title: { text: 'Event Volume' }, beginAtZero: false }
+            y: { title: { text: 'Event Volume' } }
         }
     });
 
@@ -396,7 +361,6 @@ function renderDPDTab() {
             { label: '90+ DPD', data: d.trend.map(t => t.d90), backgroundColor: a(C.red, .75), stack: 's' },
         ]
     }, {
-        plugins: { legend: { display: true } },
         scales: {
             x: { stacked: true, title: { text: 'Month' } },
             y: { stacked: true, title: { text: '% Portfolio' }, ticks: { callback: v => v + '%' } }
@@ -431,14 +395,12 @@ function renderDPDTab() {
         datasets: ch.map((c, i) => ({
             label: c.cohort,
             data: [c.m1, c.m2, c.m3, c.m4, c.m5, c.m6],
-            borderColor: [C.blue, C.cyan, C.green, C.yellow, C.orange, C.red, C.purple][i],
-            tension: .4, fill: false, borderWidth: 2, pointRadius: 4, pointHoverRadius: 6
+            fill: false
         }))
     }, {
-        plugins: { legend: { display: true } },
         scales: {
             x: { title: { text: 'Months on Book (MOB)' } },
-            y: { title: { text: 'Cum. Loss %' }, ticks: { callback: v => v + '%' }, beginAtZero: true }
+            y: { title: { text: 'Cum. Loss %' }, ticks: { callback: v => v + '%' } }
         }
     });
 }
@@ -472,7 +434,7 @@ function renderChargeOffTab() {
     }, {
         scales: {
             x: { title: { text: 'Risk Score (PDx100)' } },
-            y: { title: { text: 'Customer Volume' }, ticks: { callback: v => fmtK(v) }, beginAtZero: true }
+            y: { title: { text: 'Customer Volume' } }
         }
     });
 
@@ -527,15 +489,14 @@ function renderLossTab() {
     mkChart('lossCurveChart', 'line', {
         labels: d.curve.map(c => c.horizon),
         datasets: [
-            { label: 'Expected', data: d.curve.map(c => c.expected), borderColor: C.blue, backgroundColor: a(C.blue, .1), fill: true, tension: .4, borderWidth: 2 },
-            { label: 'Upside (Optimistic)', data: d.curve.map(c => c.upside), borderColor: C.green, fill: false, tension: .4, borderDash: [5, 4] },
-            { label: 'Downside (Stress)', data: d.curve.map(c => c.downside), borderColor: C.red, fill: false, tension: .4, borderDash: [5, 4] },
+            { label: 'Expected', data: d.curve.map(c => c.expected), borderColor: C.cyan, fill: true },
+            { label: 'Upside (Optimistic)', data: d.curve.map(c => c.upside), borderColor: C.magenta, fill: false, borderDash: [5, 4] },
+            { label: 'Downside (Stress)', data: d.curve.map(c => c.downside), borderColor: C.purple, fill: false, borderDash: [5, 4] },
         ]
     }, {
-        plugins: { legend: { display: true } },
         scales: {
             x: { title: { text: 'Forecast Horizon (Months)' } },
-            y: { title: { text: 'Cumulative Loss ($M)' }, ticks: { callback: v => '$' + v + 'M' }, beginAtZero: true }
+            y: { title: { text: 'Cumulative Loss ($M)' }, ticks: { callback: v => '$' + v + 'M' } }
         }
     });
 
@@ -550,7 +511,7 @@ function renderLossTab() {
     }, {
         scales: {
             x: { title: { text: 'Loan Product' } },
-            y: { title: { text: 'Expected Loss ($M)' }, ticks: { callback: v => '$' + v + 'M' }, beginAtZero: true }
+            y: { title: { text: 'Expected Loss ($M)' }, ticks: { callback: v => '$' + v + 'M' } }
         }
     });
 
