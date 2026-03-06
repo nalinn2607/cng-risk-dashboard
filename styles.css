@@ -1765,11 +1765,12 @@ body.light-theme .header-subtitle {
 
 body.light-theme .kpi-value,
 body.light-theme .page-title {
-  background: none;
-  -webkit-text-fill-color: var(--text-primary);
-  color: var(--text-primary);
-  text-shadow: none;
-  filter: none;
+  background: linear-gradient(135deg, #0f172a 0%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 4px rgba(59, 130, 246, 0.15));
 }
 
 body.light-theme table thead th {
