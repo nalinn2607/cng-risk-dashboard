@@ -262,8 +262,8 @@ function renderEWSTab() {
 
     const hm = d.heatmap;
     let ht = `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">
-    <thead><tr><th style="padding:8px;text-align:left;font-size:.65rem;color:var(--text-muted)">Segment</th>
-    ${hm[0].signals.map(s => `<th style="padding:8px;font-size:.62rem;color:var(--text-muted);text-align:center">${s.signal}</th>`).join('')}
+    <thead><tr><th style="padding:8px;text-align:left;font-size:.65rem">Segment</th>
+    ${hm[0].signals.map(s => `<th style="padding:8px;font-size:.62rem;text-align:center">${s.signal}</th>`).join('')}
     </tr></thead><tbody>`;
     hm.forEach(row => {
         ht += `<tr><td style="padding:8px;font-size:.76rem;font-weight:700;color:var(--text-primary);white-space:nowrap">${row.segment}</td>`;
@@ -315,8 +315,8 @@ function renderDPDTab() {
     const mm = d.migration;
     let mH = `<div style="overflow-x:auto;font-size:.72rem">
     <table class="matrix-table" style="width:100%;border-collapse:collapse">
-    <thead><tr><th style="padding:10px 8px;color:var(--text-muted);text-align:center;font-size:.62rem">From ↓ / To →</th>
-    ${mm.to.map(t => `<th style="padding:8px;color:var(--text-muted);font-size:.62rem">${t}</th>`).join('')}
+    <thead><tr><th style="padding:10px 8px;text-align:center;font-size:.62rem">From ↓ / To →</th>
+    ${mm.to.map(t => `<th style="padding:8px;font-size:.62rem">${t}</th>`).join('')}
     </tr></thead><tbody>`;
     mm.from.forEach((f, i) => {
         mH += `<tr><td style="padding:10px 8px;font-weight:800;color:var(--text-primary);white-space:nowrap;font-size:.76rem">${f}</td>`;
