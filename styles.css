@@ -1763,12 +1763,13 @@ body.light-theme .header-subtitle {
   color: var(--text-muted);
 }
 
-body.light-theme .kpi-val,
+body.light-theme .kpi-value,
 body.light-theme .page-title {
   background: none;
   -webkit-text-fill-color: var(--text-primary);
   color: var(--text-primary);
   text-shadow: none;
+  filter: none;
 }
 
 body.light-theme table thead th {
