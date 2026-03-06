@@ -811,13 +811,14 @@
     padding: 14px 16px;
     text-align: left;
     font-weight: 700;
-    color: var(--text-muted);
+    color: var(--accent-cyan);
     font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 1px;
     border-bottom: 1px solid rgba(40, 70, 130, 0.5);
     white-space: nowrap;
     font-family: 'Space Grotesk', sans-serif;
+    filter: drop-shadow(0 0 5px rgba(34, 211, 238, 0.3));
   }
 
   body.light-theme .card thead th {
