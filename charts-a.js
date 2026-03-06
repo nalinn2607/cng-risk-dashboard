@@ -262,15 +262,15 @@ function renderPortfolioCharts() {
     mkChart('portfolioTrendChart', 'line', {
         labels: d.trend.map(t => t.month),
         datasets: [
-            { label: 'Total Loans', data: d.trend.map(t => t.totalLoans), borderColor: C.blue, backgroundColor: a(C.blue, .1), fill: true, tension: .4, yAxisID: 'y' },
-            { label: 'Charge-Off %', data: d.trend.map(t => t.chargeOff), borderColor: C.red, backgroundColor: a(C.red, .07), fill: true, tension: .4, yAxisID: 'y1' },
-            { label: 'Recovery %', data: d.trend.map(t => t.recovery), borderColor: C.green, fill: false, tension: .4, yAxisID: 'y1', borderDash: [4, 3] },
+            { label: 'Total Loans', data: d.trend.map(t => t.totalLoans), borderColor: C.blue, backgroundColor: a(C.blue, .1), fill: true, tension: .4, yAxisID: 'y', pointRadius: 3 },
+            { label: 'Charge-Off %', data: d.trend.map(t => t.chargeOff), borderColor: C.red, backgroundColor: a(C.red, .07), fill: true, tension: .4, yAxisID: 'y1', pointRadius: 3 },
+            { label: 'Recovery %', data: d.trend.map(t => t.recovery), borderColor: C.green, fill: false, tension: .4, yAxisID: 'y1', borderDash: [4, 3], pointRadius: 2 },
         ]
     }, {
         plugins: { legend: { display: true } }, scales: {
             x: { title: { text: 'Reporting Month' } },
-            y: { title: { text: 'Loan Count' }, grid: { color: C.grid }, ticks: { callback: v => fmtK(v) } },
-            y1: { title: { text: 'CO / Recov Rate' }, position: 'right', grid: { display: false }, ticks: { callback: v => v + '%' } }
+            y: { title: { text: 'Loan Count' }, grid: { color: C.grid }, ticks: { callback: v => fmtK(v) }, beginAtZero: false },
+            y1: { title: { text: 'CO / Recov Rate' }, position: 'right', grid: { display: false }, ticks: { callback: v => v + '%' }, beginAtZero: false }
         }
     });
 
@@ -338,16 +338,16 @@ function renderEWSTab() {
     mkChart('ewsTrendChart', 'line', {
         labels: T.map(t => t.date),
         datasets: [
-            { label: 'High Risk', data: T.map(t => t.highRisk), borderColor: C.red, backgroundColor: a(C.red, .08), fill: true, tension: .4 },
-            { label: 'NSF Events', data: T.map(t => t.nsf), borderColor: C.orange, fill: false, tension: .4, borderDash: [4, 3] },
-            { label: 'Call Avoid', data: T.map(t => t.callAvoidance), borderColor: C.purple, fill: false, tension: .4, borderDash: [4, 3] },
-            { label: 'Stacking', data: T.map(t => t.loanStacking || 0), borderColor: C.pink, fill: false, tension: .4, borderDash: [2, 4] },
+            { label: 'High Risk', data: T.map(t => t.highRisk), borderColor: C.red, backgroundColor: a(C.red, .08), fill: true, tension: .4, pointRadius: 3 },
+            { label: 'NSF Events', data: T.map(t => t.nsf), borderColor: C.orange, fill: false, tension: .4, borderDash: [4, 3], pointRadius: 2 },
+            { label: 'Call Avoid', data: T.map(t => t.callAvoidance), borderColor: C.purple, fill: false, tension: .4, borderDash: [4, 3], pointRadius: 2 },
+            { label: 'Stacking', data: T.map(t => t.loanStacking || 0), borderColor: C.pink, fill: false, tension: .4, borderDash: [2, 4], pointRadius: 2 },
         ]
     }, {
         plugins: { legend: { display: true } },
         scales: {
             x: { title: { text: 'Observed Date' }, ticks: { maxTicksLimit: 10 } },
-            y: { title: { text: 'Event Volume' }, ticks: { callback: v => fmtK(v) }, beginAtZero: true }
+            y: { title: { text: 'Event Volume' }, beginAtZero: false }
         }
     });
 

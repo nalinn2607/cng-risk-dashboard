@@ -128,7 +128,7 @@ function renderChannelTab() {
         plugins: { legend: { display: true } },
         scales: {
             x: { title: { text: 'Reporting Month' } },
-            y: { title: { text: 'Average DPD' } }
+            y: { title: { text: 'Average DPD' }, beginAtZero: false }
         }
     });
 
@@ -142,7 +142,7 @@ function renderChannelTab() {
         plugins: { legend: { display: true } },
         scales: {
             x: { title: { text: 'Reporting Month' } },
-            y: { title: { text: 'Charge-Off Rate' }, ticks: { callback: v => v + '%' } }
+            y: { title: { text: 'Charge-Off Rate' }, ticks: { callback: v => v + '%' }, beginAtZero: false }
         }
     });
 
@@ -239,7 +239,7 @@ function renderFHSTab() {
         plugins: { legend: { display: true } },
         scales: {
             x: { title: { text: 'Monthly Trend' } },
-            y: { title: { text: 'FHS Tier %' }, ticks: { callback: v => v + '%' } }
+            y: { title: { text: 'FHS Tier %' }, ticks: { callback: v => v + '%' }, beginAtZero: false }
         }
     });
 
@@ -349,7 +349,7 @@ function renderActionsTab() {
         plugins: { legend: { display: true } },
         scales: {
             x: { title: { text: 'Monthly Performance' } },
-            y: { title: { text: 'Realized Savings ($M)' }, ticks: { callback: v => '$' + v + 'M' }, beginAtZero: true }
+            y: { title: { text: 'Realized Savings ($M)' }, ticks: { callback: v => '$' + v + 'M' }, beginAtZero: false }
         }
     });
 
