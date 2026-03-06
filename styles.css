@@ -661,8 +661,6 @@
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     box-shadow: var(--shadow-card);
-    display: flex;
-    flex-direction: column;
   }
 
   .card::before {
@@ -734,7 +732,6 @@
     grid-template-columns: 1fr 1fr;
     gap: 16px;
     margin-bottom: 16px;
-    align-items: stretch;
   }
 
   .grid-3 {
@@ -792,15 +789,10 @@
   .chart-wrap {
     position: relative;
     width: 100%;
-    flex: 1;
-    min-height: 120px;
-    display: flex;
-    flex-direction: column;
   }
 
   canvas {
     max-width: 100%;
-    flex: 1;
   }
 
   /* ─── Tables — Premium ──────────────────────────────────── */

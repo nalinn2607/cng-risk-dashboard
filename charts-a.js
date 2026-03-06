@@ -20,124 +20,67 @@ function mkChart(id, type, data, opts = {}) {
     const ctx = document.getElementById(id);
     if (!ctx) return null;
 
+    // Inject Neon Gradients
     const canvasCtx = ctx.getContext('2d');
+    const bGrad = canvasCtx.createLinearGradient(0, 0, 0, 300);
+    bGrad.addColorStop(0, 'rgba(34, 211, 238, 0.9)');    // Cyan
+    bGrad.addColorStop(1, 'rgba(232, 28, 255, 0.9)');    // Magenta
 
-    const base = {
-        responsive: true, maintainAspectRatio: false,
-        layout: { padding: { bottom: 10, left: 0, right: 10, top: 0 } },
-        plugins: {
-            tooltip: { backgroundColor: 'rgba(8, 14, 50, 0.95)', borderColor: 'rgba(232, 28, 255, 0.4)', borderWidth: 1, padding: 10, cornerRadius: 8, titleFont: { family: 'Space Grotesk' }, bodyFont: { family: 'Inter' } },
-            legend: { display: true, position: 'top', align: 'center', labels: { usePointStyle: true, boxWidth: 6, padding: 20, color: '#ffffff', font: { size: 11, weight: '600' } } }
-        }
-    };
-
-    if (['bar', 'line', 'scatter'].includes(type)) {
-        base.scales = {
-            x: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { maxRotation: 0, padding: 5, color: '#94a3b8' }, title: { display: false, color: '#ffffff', font: { size: 10, weight: '700' } } },
-            y: {
-                grid: { color: 'rgba(255,255,255,0.03)' }, beginAtZero: false, ticks: { padding: 8, color: '#ffffff', font: { size: 10 } },
-                title: { display: false },
-                afterFit: (scale) => { scale.width = 60; } // FORCE ALIGNMENT
-            }
-        };
-    }
-
-    const merged = deep(base, opts);
-
-    // Cyberpunk Gradient
     const lGrad = canvasCtx.createLinearGradient(0, 0, 0, 300);
-    lGrad.addColorStop(0, 'rgba(34, 211, 238, 0.5)'); // Strong glowing top
-    lGrad.addColorStop(1, 'rgba(232, 28, 255, 0.02)'); // Fades into dark navy
-    const lineColors = [C.cyan, C.magenta, C.purple, C.blue, C.pink];
+    lGrad.addColorStop(0, 'rgba(34, 211, 238, 0.2)');
+    lGrad.addColorStop(1, 'rgba(232, 28, 255, 0.05)');
 
     if (data.datasets) {
-        data.datasets.forEach((ds, i) => {
-            const defColor = lineColors[i % lineColors.length];
-            if (type === 'bar') {
-                if (!ds.backgroundColor) ds.backgroundColor = makeBarGradient(canvasCtx, defColor);
-                else if (typeof ds.backgroundColor === 'string') ds.backgroundColor = makeBarGradient(canvasCtx, ds.backgroundColor);
-                ds.borderRadius = { topLeft: 4, topRight: 4, bottomLeft: 0, bottomRight: 0 };
-                ds.barPercentage = 0.55;
-            } else if (type === 'line') {
-                if (!ds.borderColor) ds.borderColor = defColor;
-                if (ds.fill === true) ds.backgroundColor = lGrad;
+        data.datasets.forEach(ds => {
+            if (type === 'bar' && (!ds.backgroundColor || typeof ds.backgroundColor === 'string')) {
+                ds.backgroundColor = bGrad;
+                ds.borderRadius = 6;
+                ds.borderWidth = 0;
+            } else if (type === 'line' && ds.fill) {
+                ds.backgroundColor = lGrad;
+                ds.borderColor = C.cyan;
                 ds.borderWidth = 3;
-                ds.pointStyle = 'rectRounded';
-                ds.pointRadius = 4;
-                ds.pointBorderWidth = 2;
-                ds.pointBackgroundColor = '#01011A'; // Dark center
-                ds.pointHoverRadius = 6;
-                ds.tension = 0; // Straight, stark angular lines
-            } else if (type === 'doughnut' || type === 'pie') {
+                ds.tension = 0.4;
+                // Add inner glow fallback using shadow config properties in chart
+            } else if (type === 'line' && !ds.fill) {
+                ds.borderColor = C.magenta;
                 ds.borderWidth = 3;
-                ds.borderColor = '#040914';
+                ds.tension = 0.4;
             }
         });
     }
 
-    function makeBarGradient(c, colorStr) {
-        const hex = colorStr.startsWith('#') ? colorStr : '#22d3ee';
-        const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
-        const grad = c.createLinearGradient(0, 0, 0, 300);
-        grad.addColorStop(0, `rgba(${r},${g},${b},1)`);
-        grad.addColorStop(1, `rgba(${r},${g},${b},0.15)`);
-        return grad;
-    }
+    const base = {
+        responsive: true, maintainAspectRatio: false,
+        layout: { padding: { bottom: 15, left: 10, right: 10, top: 5 } },
+        plugins: {
+            tooltip: { backgroundColor: 'rgba(8, 14, 50, 0.95)', borderColor: 'rgba(232, 28, 255, 0.4)', borderWidth: 1, padding: 10, cornerRadius: 8, titleFont: { family: 'Space Grotesk' }, bodyFont: { family: 'Inter' } },
+            legend: { display: false }
+        }
+    };
+    if (['bar', 'line', 'scatter'].includes(type)) base.scales = {
+        x: { grid: { color: C.grid }, ticks: { maxRotation: 0, padding: 5, color: '#94a3b8' }, title: { display: true, color: '#ffffff', font: { size: 10, weight: '700' } } },
+        y: { grid: { color: C.grid }, beginAtZero: false, ticks: { padding: 5, color: '#94a3b8' }, title: { display: true, color: '#ffffff', font: { size: 10, weight: '700' } } }
+    };
+    const merged = deep(base, opts);
 
     // Custom charting plugin to draw global glowing shadow
     const neonPlugin = {
         id: 'neonGlow',
         beforeDatasetsDraw: (chart) => {
-            if (chart.config.type !== 'line' && chart.config.type !== 'bar' && chart.config.type !== 'doughnut') return;
             const cCtx = chart.ctx;
             cCtx.save();
-
-            // Boost vibrancy for doughnuts
-            if (chart.config.type === 'doughnut') {
-                cCtx.filter = 'saturate(1.4) brightness(1.1)';
-            }
-
-            cCtx.shadowColor = chart.config.type === 'doughnut' ? 'rgba(232, 28, 255, 0.4)' : 'rgba(34, 211, 238, 0.5)';
-            cCtx.shadowBlur = 18;
+            cCtx.shadowColor = 'rgba(34, 211, 238, 0.4)';
+            cCtx.shadowBlur = 15;
             cCtx.shadowOffsetX = 0;
-            cCtx.shadowOffsetY = 5;
-            if (chart.config.type === 'doughnut') cCtx.shadowOffsetY = 0;
+            cCtx.shadowOffsetY = 4;
         },
         afterDatasetsDraw: (chart) => {
-            chart.ctx.filter = 'none';
             chart.ctx.restore();
         }
     };
 
-    // Advanced Center Text Plugin for Doughnuts
-    const centerTextPlugin = {
-        id: 'centerTextPlugin',
-        beforeDraw: (chart) => {
-            if (chart.config.type !== 'doughnut' || !chart.config.options.centerText) return;
-            const width = chart.chartArea.right - chart.chartArea.left;
-            const height = chart.chartArea.bottom - chart.chartArea.top;
-            const ctx = chart.ctx;
-
-            ctx.restore();
-            // Elegant, smaller subtitle font
-            const fontSize = (height / 140).toFixed(2);
-            ctx.font = `700 ${fontSize}em "Inter", sans-serif`;
-            ctx.textBaseline = "middle";
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-            ctx.shadowColor = 'rgba(34, 211, 238, 0.3)';
-            ctx.shadowBlur = 8;
-            ctx.letterSpacing = "2px";
-
-            const text = chart.config.options.centerText.toUpperCase();
-            const textX = chart.chartArea.left + Math.round((width - ctx.measureText(text).width) / 2);
-            const textY = chart.chartArea.top + Math.round(height / 2);
-
-            ctx.fillText(text, textX, textY);
-            ctx.save();
-        }
-    };
-
-    const inst = new Chart(ctx, { type, data, options: merged, plugins: [neonPlugin, centerTextPlugin] });
+    const inst = new Chart(ctx, { type, data, options: merged, plugins: [neonPlugin] });
     window._chartInstances[id] = inst;
     return inst;
 }
@@ -228,15 +171,15 @@ function renderPortfolioCharts() {
     mkChart('portfolioTrendChart', 'line', {
         labels: d.trend.map(t => t.month),
         datasets: [
-            { label: 'Total Loans', data: d.trend.map(t => t.totalLoans), borderColor: C.cyan, fill: true, yAxisID: 'y' },
-            { label: 'Charge-Off %', data: d.trend.map(t => t.chargeOff), borderColor: C.magenta, fill: false, yAxisID: 'y1' },
-            { label: 'Recovery %', data: d.trend.map(t => t.recovery), borderColor: C.purple, fill: false, yAxisID: 'y1', borderDash: [4, 3] },
+            { label: 'Total Loans', data: d.trend.map(t => t.totalLoans), borderColor: C.blue, backgroundColor: a(C.blue, .1), fill: true, tension: .4, yAxisID: 'y' },
+            { label: 'Charge-Off %', data: d.trend.map(t => t.chargeOff), borderColor: C.red, backgroundColor: a(C.red, .07), fill: true, tension: .4, yAxisID: 'y1' },
+            { label: 'Recovery %', data: d.trend.map(t => t.recovery), borderColor: C.green, fill: false, tension: .4, yAxisID: 'y1', borderDash: [4, 3] },
         ]
     }, {
         plugins: { legend: { display: true } }, scales: {
             x: { title: { text: 'Reporting Month' } },
-            y: { title: { text: 'Loan Count' }, grid: { color: C.grid }, ticks: { callback: v => fmtK(v) }, beginAtZero: false },
-            y1: { title: { text: 'CO / Recov Rate' }, position: 'right', grid: { display: false }, ticks: { callback: v => v + '%' }, beginAtZero: false }
+            y: { title: { text: 'Loan Count' }, grid: { color: C.grid }, ticks: { callback: v => fmtK(v) } },
+            y1: { title: { text: 'CO / Recov Rate' }, position: 'right', grid: { display: false }, ticks: { callback: v => v + '%' } }
         }
     });
 
@@ -246,7 +189,7 @@ function renderPortfolioCharts() {
             data: d.productMix.map(p => p.pct), backgroundColor: [C.blue, C.cyan, C.purple, C.orange],
             hoverOffset: 12, borderWidth: 3, borderColor: '#0c1628'
         }]
-    }, { plugins: { legend: { display: true, position: 'bottom' } }, cutout: '65%' });
+    }, { plugins: { legend: { display: true, position: 'bottom' } }, cutout: '68%' });
 
     mkChart('rollRateChart', 'bar', {
         labels: ['0→30', '30→60', '60→90', '90+→CO'],
@@ -258,7 +201,7 @@ function renderPortfolioCharts() {
     }, {
         scales: {
             x: { title: { text: 'Transition' } },
-            y: { title: { text: 'Roll Rate %' }, ticks: { callback: v => v + '%' } }
+            y: { title: { text: 'Roll Rate %' }, ticks: { callback: v => v + '%' }, beginAtZero: true }
         }
     });
 
@@ -296,7 +239,7 @@ function renderEWSTab() {
     }, {
         scales: {
             x: { title: { text: 'EWS Score Range' }, ticks: { maxRotation: 45 } },
-            y: { title: { text: 'Customer Count' } }
+            y: { title: { text: 'Customer Count' }, ticks: { callback: v => fmtK(v) }, beginAtZero: true }
         }
     });
 
@@ -304,15 +247,16 @@ function renderEWSTab() {
     mkChart('ewsTrendChart', 'line', {
         labels: T.map(t => t.date),
         datasets: [
-            { label: 'High Risk', data: T.map(t => t.highRisk), borderColor: C.cyan, fill: true },
-            { label: 'NSF Events', data: T.map(t => t.nsf), borderColor: C.magenta, fill: false, borderDash: [4, 3] },
-            { label: 'Call Avoid', data: T.map(t => t.callAvoidance), borderColor: C.purple, fill: false, borderDash: [4, 3] },
-            { label: 'Stacking', data: T.map(t => t.loanStacking || 0), borderColor: C.blue, fill: false, borderDash: [2, 4] },
+            { label: 'High Risk', data: T.map(t => t.highRisk), borderColor: C.red, backgroundColor: a(C.red, .08), fill: true, tension: .4 },
+            { label: 'NSF Events', data: T.map(t => t.nsf), borderColor: C.orange, fill: false, tension: .4, borderDash: [4, 3] },
+            { label: 'Call Avoid', data: T.map(t => t.callAvoidance), borderColor: C.purple, fill: false, tension: .4, borderDash: [4, 3] },
+            { label: 'Stacking', data: T.map(t => t.loanStacking || 0), borderColor: C.pink, fill: false, tension: .4, borderDash: [2, 4] },
         ]
     }, {
+        plugins: { legend: { display: true } },
         scales: {
             x: { title: { text: 'Observed Date' }, ticks: { maxTicksLimit: 10 } },
-            y: { title: { text: 'Event Volume' } }
+            y: { title: { text: 'Event Volume' }, ticks: { callback: v => fmtK(v) }, beginAtZero: true }
         }
     });
 
@@ -361,6 +305,7 @@ function renderDPDTab() {
             { label: '90+ DPD', data: d.trend.map(t => t.d90), backgroundColor: a(C.red, .75), stack: 's' },
         ]
     }, {
+        plugins: { legend: { display: true } },
         scales: {
             x: { stacked: true, title: { text: 'Month' } },
             y: { stacked: true, title: { text: '% Portfolio' }, ticks: { callback: v => v + '%' } }
@@ -395,12 +340,14 @@ function renderDPDTab() {
         datasets: ch.map((c, i) => ({
             label: c.cohort,
             data: [c.m1, c.m2, c.m3, c.m4, c.m5, c.m6],
-            fill: false
+            borderColor: [C.blue, C.cyan, C.green, C.yellow, C.orange, C.red, C.purple][i],
+            tension: .4, fill: false, borderWidth: 2, pointRadius: 4, pointHoverRadius: 6
         }))
     }, {
+        plugins: { legend: { display: true } },
         scales: {
             x: { title: { text: 'Months on Book (MOB)' } },
-            y: { title: { text: 'Cum. Loss %' }, ticks: { callback: v => v + '%' } }
+            y: { title: { text: 'Cum. Loss %' }, ticks: { callback: v => v + '%' }, beginAtZero: true }
         }
     });
 }
@@ -434,7 +381,7 @@ function renderChargeOffTab() {
     }, {
         scales: {
             x: { title: { text: 'Risk Score (PDx100)' } },
-            y: { title: { text: 'Customer Volume' } }
+            y: { title: { text: 'Customer Volume' }, ticks: { callback: v => fmtK(v) }, beginAtZero: true }
         }
     });
 
@@ -489,14 +436,15 @@ function renderLossTab() {
     mkChart('lossCurveChart', 'line', {
         labels: d.curve.map(c => c.horizon),
         datasets: [
-            { label: 'Expected', data: d.curve.map(c => c.expected), borderColor: C.cyan, fill: true },
-            { label: 'Upside (Optimistic)', data: d.curve.map(c => c.upside), borderColor: C.magenta, fill: false, borderDash: [5, 4] },
-            { label: 'Downside (Stress)', data: d.curve.map(c => c.downside), borderColor: C.purple, fill: false, borderDash: [5, 4] },
+            { label: 'Expected', data: d.curve.map(c => c.expected), borderColor: C.blue, backgroundColor: a(C.blue, .1), fill: true, tension: .4, borderWidth: 2 },
+            { label: 'Upside (Optimistic)', data: d.curve.map(c => c.upside), borderColor: C.green, fill: false, tension: .4, borderDash: [5, 4] },
+            { label: 'Downside (Stress)', data: d.curve.map(c => c.downside), borderColor: C.red, fill: false, tension: .4, borderDash: [5, 4] },
         ]
     }, {
+        plugins: { legend: { display: true } },
         scales: {
             x: { title: { text: 'Forecast Horizon (Months)' } },
-            y: { title: { text: 'Cumulative Loss ($M)' }, ticks: { callback: v => '$' + v + 'M' } }
+            y: { title: { text: 'Cumulative Loss ($M)' }, ticks: { callback: v => '$' + v + 'M' }, beginAtZero: true }
         }
     });
 
@@ -511,7 +459,7 @@ function renderLossTab() {
     }, {
         scales: {
             x: { title: { text: 'Loan Product' } },
-            y: { title: { text: 'Expected Loss ($M)' }, ticks: { callback: v => '$' + v + 'M' } }
+            y: { title: { text: 'Expected Loss ($M)' }, ticks: { callback: v => '$' + v + 'M' }, beginAtZero: true }
         }
     });
 
