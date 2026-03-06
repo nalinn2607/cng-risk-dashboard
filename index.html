@@ -85,6 +85,7 @@
 
           <div class="live-chip"><span class="pulse-dot"></span> LIVE DATA</div>
           <div class="timestamp" id="tsDisplay">Loading...</div>
+          <button class="header-btn" id="themeToggleBtn">🌓 Theme</button>
           <button class="header-btn" onclick="refreshDashboard()">⟳ Refresh</button>
           <button class="header-btn" onclick="exportCSV()">↓ Export</button>
         </div>
@@ -554,8 +555,66 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="data.js"></script>
+  <!-- Theme Logic -->
+  <script>
+    const themeBtn = document.getElementById('themeToggleBtn');
+    const root = document.body;
+
+    // Load from localStorage
+    const savedTheme = localStorage.getItem('dashboardTheme');
+    if (savedTheme === 'light') {
+      root.classList.add('light-theme');
+      updateChartTheme('light');
+    }
+
+    themeBtn.addEventListener('click', () => {
+      root.classList.toggle('light-theme');
+      const isLight = root.classList.contains('light-theme');
+      localStorage.setItem('dashboardTheme', isLight ? 'light' : 'dark');
+      updateChartTheme(isLight ? 'light' : 'dark');
+    });
+
+    function updateChartTheme(theme) {
+      if (typeof Chart === 'undefined') return;
+      const isL = theme === 'light';
+      
+      // Update global defaults
+      Chart.defaults.color = isL ? '#475569' : '#94afd4'; // Text color
+      
+      // Go through all existing chart instances to update grid lines and scale text
+      for (const id in window._chartInstances) {
+        const chart = window._chartInstances[id];
+        if (chart.options && chart.options.scales) {
+          for (const scaleId in chart.options.scales) {
+            const scale = chart.options.scales[scaleId];
+            if (scale.grid) {
+              scale.grid.color = isL ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.05)';
+            }
+            if (scale.ticks) {
+              scale.ticks.color = isL ? '#64748b' : '#ffffff';
+            }
+            if (scale.title) {
+              scale.title.color = isL ? '#334155' : '#ffffff';
+            }
+          }
+        }
+        if (chart.options && chart.options.plugins && chart.options.plugins.legend && chart.options.plugins.legend.labels) {
+          chart.options.plugins.legend.labels.color = isL ? '#334155' : '#ffffff';
+        }
+        // Update tooltip bg
+        if (chart.options && chart.options.plugins && chart.options.plugins.tooltip) {
+           chart.options.plugins.tooltip.backgroundColor = isL ? 'rgba(255, 255, 255, 0.95)' : 'rgba(8, 14, 50, 0.95)';
+           chart.options.plugins.tooltip.titleColor = isL ? '#0f172a' : '#fff';
+           chart.options.plugins.tooltip.bodyColor = isL ? '#334155' : '#fff';
+        }
+        chart.update('none'); // Update without full animation for snappiness
+      }
+    }
+  </script>
+
   <script src="charts-a.js"></script>
   <script src="charts-b.js"></script>
+  <script src="charts.js"></script>
   <script>
     // ── Tab switching ────────────────────────────────────────
     const tabTitles = {
