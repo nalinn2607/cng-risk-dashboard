@@ -29,6 +29,7 @@ function makeChart(id, type, data, options = {}) {
 
 function defaultOpts(type) {
   const base = {
+    onClick: window.handleChartClick,
     responsive: true,
     maintainAspectRatio: false,
     layout: { padding: { top: 5, bottom: 20, left: 20, right: 20 } },

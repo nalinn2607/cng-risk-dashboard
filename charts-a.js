@@ -51,6 +51,7 @@ function mkChart(id, type, data, opts = {}) {
     }
 
     const base = {
+        onClick: window.handleChartClick,
         responsive: true, maintainAspectRatio: false,
         layout: { padding: { bottom: 15, left: 10, right: 10, top: 5 } },
         plugins: {
